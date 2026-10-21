@@ -13,6 +13,7 @@ import {
   Menu,
   Plug,
   Settings,
+  Sparkles,
   Truck,
 } from 'lucide-react';
 import { createI18n, directionOf, LOCALE_NAMES, matchLocale } from '../../lib/i18n';
@@ -24,6 +25,7 @@ import { cn } from '../ui/utils';
 import { OfflineNotice } from './common';
 import { AppContext, PAGES, type PageId } from './context';
 import { useResource } from './hooks';
+import type { BillingResponse } from './types';
 import { OverviewPage } from './pages/OverviewPage';
 import { LocationsPage } from './pages/LocationsPage';
 import { RulesPage } from './pages/RulesPage';
@@ -109,6 +111,10 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
   const [page, setPage] = useState<PageId>(pageFromHash);
   const [mobileOpen, setMobileOpen] = useState(false);
   const settings = useResource<MerchantSettings>('settings');
+  const billing = useResource<BillingResponse>('billing');
+  const plan = billing.data?.entitlement.plan;
+  // Pro (including overrides) has nothing above it; hidden until billing loads so it never flickers.
+  const canUpgrade = plan !== undefined && plan !== 'pro';
 
   useEffect(() => {
     const onHash = () => setPage(pageFromHash());
@@ -151,6 +157,14 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
         {live ? t('nav.status.live') : t('nav.status.paused')}
       </Badge>
       <NavList page={page} onSelect={navigate} />
+      {canUpgrade && (
+        <div className="bg-card mx-2 grid gap-2 rounded-lg border p-3">
+          <p className="text-muted-foreground text-xs">{t('nav.currentPlan', { plan: t(`common.planNames.${plan}`) })}</p>
+          <Button size="sm" onClick={() => navigate('billing')}>
+            <Sparkles aria-hidden="true" /> {t('nav.upgrade')}
+          </Button>
+        </div>
+      )}
       <div className="mt-auto grid gap-1.5 px-2">
         <label htmlFor="locale-select" className="text-muted-foreground text-xs">
           {t('common.language')}
@@ -178,6 +192,11 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
                 <Menu />
               </Button>
               <span className="truncate text-sm font-semibold">{t(`nav.${page}`)}</span>
+              {canUpgrade && (
+                <Button size="sm" className="ms-auto" onClick={() => navigate('billing')}>
+                  <Sparkles aria-hidden="true" /> {t('nav.upgrade')}
+                </Button>
+              )}
             </header>
             <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 p-4 pb-16 outline-none sm:p-6 lg:p-8">
               <PageComponent />

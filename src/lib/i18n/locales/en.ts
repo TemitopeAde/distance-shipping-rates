@@ -52,6 +52,8 @@ const en = {
     help: 'Help',
     menu: 'Open menu',
     status: { live: 'Live at checkout', paused: 'Not live' },
+    upgrade: 'Upgrade plan',
+    currentPlan: 'Current plan: {{plan}}',
   },
   errors: {
     network: 'Can’t reach the server. Check your connection and try again.',
