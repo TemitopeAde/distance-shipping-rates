@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checkout</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 520px; display: flex; flex-direction: column; justify-content: center; color: #fff; }
+  .copy h1 { font-size: 44px; font-weight: 700; line-height: 1.12; letter-spacing: -.5px; }
+  .copy > p { font-size: 20px; line-height: 1.45; margin-top: 16px; color: rgba(255,255,255,.88); }
+  .pts { list-style: none; margin-top: 34px; display: grid; gap: 20px; }
+  .pts li { display: flex; gap: 14px; font-size: 20px; line-height: 1.35; }
+  .pts li b { width: 40px; height: 40px; border-radius: 11px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pts small { display: block; font-size: 17px; color: rgba(255,255,255,.78); margin-top: 2px; }
+  .phone { position: absolute; right: 120px; top: 70px; width: 390px; height: 800px; background: #0f172a; border-radius: 56px; padding: 14px; box-shadow: 0 40px 90px rgba(10,20,60,.45); }
+  .scr { width: 100%; height: 100%; background: #fff; border-radius: 44px; overflow: hidden; padding: 54px 22px 22px; position: relative; font-size: 15px; }
+  .notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 110px; height: 30px; background: #0f172a; border-radius: 20px; }
+  .shop { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 17px; }
+  .steps { display: flex; gap: 6px; margin: 18px 0 14px; font-size: 12.5px; color: var(--muted-foreground); }
+  .steps b { color: var(--foreground); }
+  h5 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .addr { font-size: 14px; color: var(--muted-foreground); margin-bottom: 16px; line-height: 1.4; }
+  .opts { display: grid; gap: 10px; }
+  .o { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center; }
+  .o.on { border-color: var(--brand); background: oklch(0.97 0.015 255); }
+  .r { width: 20px; height: 20px; border-radius: 50%; border: 2px solid oklch(0.75 0.01 250); flex-shrink: 0; }
+  .o.on .r { border: 6px solid var(--brand); }
+  .o .n { font-weight: 600; }
+  .o .d { font-size: 13px; color: var(--muted-foreground); margin-top: 2px; }
+  .o .p { margin-left: auto; font-weight: 700; }
+  .sum { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; display: grid; gap: 8px; font-size: 14.5px; }
+  .sum div { display: flex; justify-content: space-between; }
+  .pay { position: absolute; left: 22px; right: 22px; bottom: 26px; background: #111827; color: #fff; border-radius: 12px; padding: 15px; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <h1>An exact delivery price at checkout</h1>
+    <p>Customers see your delivery option, priced for their address, right inside your Wix cart and checkout.</p>
+    <ul class="pts">
+      <li><b><i data-i="route" data-s="20"></i></b><div>Real road distance<small>Not straight-line estimates</small></div></li>
+      <li><b><i data-i="shield-check" data-s="20"></i></b><div>Safe when something fails<small>Offer no rate or your flat fallback rate</small></div></li>
+      <li><b><i data-i="lock" data-s="20"></i></b><div>Privacy-aware logs<small>No customer names, emails or street addresses stored</small></div></li>
+    </ul>
+  </div>
+  <div class="phone"><div class="scr">
+    <div class="notch"></div>
+    <div class="shop"><span>Oak Street Bakery</span><i data-i="lock" data-s="16" style="color:var(--muted-foreground)"></i></div>
+    <div class="steps"><span>Details</span>›<b>Delivery</b>›<span>Payment</span></div>
+    <h5>Delivery method</h5>
+    <div class="addr">To 1100 S Lamar Blvd, Austin, TX 78704</div>
+    <div class="opts num">
+      <div class="o on"><span class="r"></span><div><div class="n">Local delivery</div><div class="d">Same day</div></div><span class="p">$33.50</span></div>
+      <div class="o"><span class="r"></span><div><div class="n">Store pickup</div><div class="d">Ready in 2 hours</div></div><span class="p">Free</span></div>
+    </div>
+    <div class="sum num">
+      <div><span class="muted">Subtotal</span><span>$58.00</span></div>
+      <div><span class="muted">Delivery</span><span>$31.00</span></div>
+      <div><span class="muted">Handling</span><span>$2.50</span></div>
+      <div style="font-weight:700;font-size:17px"><span>Total</span><span>$91.50</span></div>
+    </div>
+    <div class="pay">Continue to payment</div>
+  </div></div>
+<script src="shell.js"></script><script src="icons.js"></script>
+</body>
+</html>

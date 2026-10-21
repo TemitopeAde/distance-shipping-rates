@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pricing rules</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .main { position: relative; }
+  .scrim { position: absolute; inset: 0; background: rgba(15, 23, 42, .38); }
+  .dlg { position: absolute; left: 50%; transform: translateX(-50%); top: 34px; width: 640px; background: #fff; border-radius: 14px; box-shadow: 0 24px 70px rgba(10,20,60,.35); padding: 24px 26px; display: grid; gap: 18px; }
+  .dlg h4 { font-size: 20px; font-weight: 700; }
+  .tabs { display: flex; gap: 4px; background: var(--muted); border-radius: 9px; padding: 4px; }
+  .tabs span { flex: 1; text-align: center; padding: 7px 4px; border-radius: 6px; font-size: 13.5px; font-weight: 500; color: var(--muted-foreground); white-space: nowrap; }
+  .tabs span.on { background: #fff; color: var(--foreground); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .ex { background: var(--accent); color: var(--accent-foreground); border-radius: 8px; padding: 10px 12px; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .foot { display: flex; justify-content: flex-end; gap: 10px; }
+</style>
+</head>
+<body>
+  <div class="cap">
+    <h1>Price delivery your way</h1>
+    <p>Base fee plus a rate per mile or km, distance brackets, minimum and maximum fees, surcharges and free delivery thresholds.</p>
+  </div>
+  <div class="win">
+    <div class="chrome"><span></span><span></span><span></span></div>
+    <div class="app">
+      <aside class="side" data-active="rules"></aside>
+      <div class="main">
+        <div class="ph" style="display:flex;align-items:flex-start;gap:16px"><div style="flex:1"><h2>Pricing rules</h2><p>Each active rule becomes a delivery option at checkout.</p></div><span class="btn"><i data-i="plus"></i>Add rule</span></div>
+        <div class="card" style="padding:14px 10px">
+          <table>
+            <tr><th>Rule</th><th>Checkout option</th><th>Pricing</th><th>Status</th></tr>
+            <tr><td><b>Local delivery</b></td><td>Local delivery</td><td class="num">$5.00 + $2.00/mi</td><td><span class="badge ok">Active</span></td></tr>
+            <tr><td><b>Express</b></td><td>Express (2 hours)</td><td class="num">3 brackets</td><td><span class="badge ok">Active</span></td></tr>
+            <tr><td><b>Bulky items</b></td><td>Large item delivery</td><td class="num">$15.00 + $3.50/mi</td><td><span class="badge soft">Inactive</span></td></tr>
+          </table>
+        </div>
+        <div class="scrim"></div>
+        <div class="dlg">
+          <h4>Edit pricing rule</h4>
+          <div class="tabs"><span>Basics</span><span class="on">Distance pricing</span><span>Free delivery &amp; fees</span><span>Conditions</span></div>
+          <div class="field"><label>Pricing model</label><div class="input">Base fee + rate per distance<i data-i="chevron-down" style="margin-left:auto;color:var(--muted-foreground)"></i></div></div>
+          <div class="ex"><i data-i="sparkles"></i>Example: 5.00 + 10 mi × 2.00 = 25.00</div>
+          <div class="g3">
+            <div class="field"><label>Base fee</label><div class="input num">$ 5.00</div></div>
+            <div class="field"><label>Rate per mi</label><div class="input num">$ 2.00</div></div>
+            <div class="field"><label>Included distance</label><div class="input num">0<span class="unit">mi</span></div></div>
+            <div class="field"><label>Minimum fee</label><div class="input num">$ 10.00</div></div>
+            <div class="field"><label>Maximum fee</label><div class="input num">$ 60.00</div></div>
+            <div class="field"><label>Maximum distance</label><div class="input num">30<span class="unit">mi</span></div></div>
+          </div>
+          <div class="g3" style="grid-template-columns:1fr 1fr">
+            <div class="field"><label>Bill distance in steps of</label><div class="input num">1<span class="unit">mi</span></div></div>
+            <div class="field"><label>Rounding</label><div class="input">Round up<i data-i="chevron-down" style="margin-left:auto;color:var(--muted-foreground)"></i></div></div>
+          </div>
+          <div class="foot"><span class="btn out">Cancel</span><span class="btn">Save changes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="shell.js"></script><script src="icons.js"></script>
+</body>
+</html>

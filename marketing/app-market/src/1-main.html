@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Main image</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 500px; display: flex; flex-direction: column; justify-content: center; color: #fff; }
+  .mark { width: 76px; height: 76px; border-radius: 20px; background: #fff; color: var(--brand); display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(10,20,60,.25); }
+  .copy h1 { font-size: 54px; font-weight: 900; line-height: 1.05; letter-spacing: -1px; margin-top: 34px; }
+  .copy .tag { font-size: 26px; line-height: 1.35; margin-top: 22px; color: rgba(255,255,255,.92); }
+  .pts { list-style: none; margin-top: 38px; display: grid; gap: 14px; }
+  .pts li { display: flex; align-items: center; gap: 12px; font-size: 20px; }
+  .pts li b { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; }
+  .stage { position: absolute; right: 64px; top: 92px; width: 540px; height: 716px; }
+  .mapcard { position: absolute; inset: 0 0 96px 0; border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(10,20,60,.4); border: 6px solid #fff; }
+  .opt { position: absolute; left: -56px; right: 40px; bottom: 0; background: #fff; border-radius: 18px; padding: 22px 24px; box-shadow: 0 24px 60px rgba(10,20,60,.35); display: flex; align-items: center; gap: 18px; }
+  .radio { width: 26px; height: 26px; border-radius: 50%; border: 8px solid var(--brand); flex-shrink: 0; }
+  .opt .t { font-size: 21px; font-weight: 700; }
+  .opt .s { font-size: 16px; color: var(--muted-foreground); margin-top: 3px; }
+  .opt .p { margin-left: auto; font-size: 30px; font-weight: 800; color: var(--foreground); }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="mark"><i data-i="truck" data-s="42"></i></div>
+    <h1>Distance-Based Shipping &amp; Delivery</h1>
+    <p class="tag">Charge for local delivery by real road distance, calculated live at checkout.</p>
+    <ul class="pts">
+      <li><b><i data-i="check" data-s="17"></i></b>Base fee + rate per mile or km</li>
+      <li><b><i data-i="check" data-s="17"></i></b>Zones, distance limits &amp; free delivery</li>
+      <li><b><i data-i="check" data-s="17"></i></b>Works inside your Wix checkout</li>
+    </ul>
+  </div>
+  <div class="stage">
+    <div class="mapcard"><div class="map" data-w="528" data-h="608" data-vb="80 -20 780 898"></div></div>
+    <div class="opt">
+      <span class="radio"></span>
+      <div><div class="t">Local delivery</div><div class="s">Same day · 12.4 mi from Downtown store</div></div>
+      <div class="p num">$33.50</div>
+    </div>
+  </div>
+<script src="shell.js"></script><script src="icons.js"></script><script src="map.js"></script>
+</body>
+</html>

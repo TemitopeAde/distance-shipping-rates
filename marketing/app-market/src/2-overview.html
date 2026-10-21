@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overview</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .steps { display: grid; gap: 9px; margin-top: 14px; }
+  .step { display: flex; align-items: center; gap: 11px; font-size: 14.5px; }
+  .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--success); color: #fff; display: flex; align-items: center; justify-content: center; }
+  .dot.todo { background: #fff; border: 2px solid var(--border); }
+  .bar { height: 8px; border-radius: 99px; background: var(--muted); overflow: hidden; margin-top: 12px; }
+  .bar i { display: block; height: 100%; background: var(--primary); border-radius: 99px; }
+  .stat { font-size: 30px; font-weight: 700; margin-top: 10px; letter-spacing: -.5px; }
+</style>
+</head>
+<body>
+  <div class="cap">
+    <h1>Set up in minutes, then watch it work</h1>
+    <p>A guided checklist gets you live. Then follow checkout health and every calculation in one place.</p>
+  </div>
+  <div class="win">
+    <div class="chrome"><span></span><span></span><span></span></div>
+    <div class="app">
+      <aside class="side" data-active="overview"></aside>
+      <div class="main">
+        <div class="ph"><h2>Overview</h2><p>Set up distance-based delivery pricing and monitor how it performs at checkout.</p></div>
+        <div class="row">
+          <div class="card" style="flex:1">
+            <h3><i data-i="shield-check" style="color:var(--success)"></i>Checkout health</h3>
+            <div style="margin-top:12px"><span class="badge ok">Healthy</span></div>
+            <p class="muted" style="margin-top:10px;font-size:13.5px">Recent checkout requests were answered normally.</p>
+          </div>
+          <div class="card" style="flex:1">
+            <h3><i data-i="route" style="color:var(--primary)"></i>Routing lookups</h3>
+            <div class="stat num">1,284 <span class="muted" style="font-size:16px;font-weight:500">of 5,000</span></div>
+            <div class="bar"><i style="width:26%"></i></div>
+          </div>
+          <div class="card" style="flex:1">
+            <h3><i data-i="zap" style="color:var(--warning)"></i>Checkout status</h3>
+            <div style="margin-top:12px"><span class="badge ok"><i data-i="circle-check" data-s="13"></i>Rates are live</span></div>
+            <p class="muted" style="margin-top:10px;font-size:13.5px">Last checkout request: 2m</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card" style="width:300px;flex-shrink:0">
+            <h3>Setup checklist</h3>
+            <div class="muted" style="font-size:13.5px;margin-top:6px">100% complete</div>
+            <div class="bar"><i style="width:100%"></i></div>
+            <div class="steps">
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Add a fulfillment location</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Choose miles or kilometers</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Create a pricing rule</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Decide what happens on failures</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Enable in Wix shipping</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Run a test checkout</div>
+              <div class="step"><span class="dot"><i data-i="check" data-s="13"></i></span>Go live</div>
+            </div>
+          </div>
+          <div class="card" style="flex:1">
+            <h3>Recent calculations</h3>
+            <table style="margin-top:14px">
+              <tr><th>Time</th><th>Destination</th><th>Distance</th><th>Price</th><th>Status</th></tr>
+              <tr><td class="muted">2m</td><td>Austin 78704</td><td class="num">12.4 mi</td><td class="num">$33.50</td><td><span class="badge ok">Priced</span></td></tr>
+              <tr><td class="muted">9m</td><td>Round Rock 78664</td><td class="num">19.8 mi</td><td class="num">$47.10</td><td><span class="badge ok">Priced</span></td></tr>
+              <tr><td class="muted">14m</td><td>Austin 78751</td><td class="num">4.1 mi</td><td class="num">Free</td><td><span class="badge ok">Priced</span></td></tr>
+              <tr><td class="muted">31m</td><td>Waco 76701</td><td class="num">101.6 mi</td><td class="num">—</td><td><span class="badge soft">No rate</span></td></tr>
+              <tr><td class="muted">48m</td><td>Pflugerville 78660</td><td class="num">16.2 mi</td><td class="num">$39.50</td><td><span class="badge ok">Priced</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="shell.js"></script><script src="icons.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=block');
+
+/* Tokens copied from src/styles/globals.css so the mockups match the real dashboard. */
+:root {
+  --brand: oklch(0.52 0.19 258);
+  --brand-deep: oklch(0.42 0.17 260);
+  --background: oklch(0.985 0.002 247);
+  --foreground: oklch(0.21 0.02 260);
+  --card: #fff;
+  --primary: oklch(0.52 0.19 258);
+  --muted: oklch(0.96 0.006 250);
+  --muted-foreground: oklch(0.5 0.02 257);
+  --accent: oklch(0.95 0.02 255);
+  --accent-foreground: oklch(0.3 0.08 258);
+  --success: oklch(0.6 0.14 155);
+  --success-soft: oklch(0.95 0.05 155);
+  --warning: oklch(0.78 0.16 75);
+  --warning-soft: oklch(0.96 0.06 85);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-soft: oklch(0.95 0.03 27);
+  --border: oklch(0.91 0.008 250);
+  --sidebar: oklch(0.99 0.002 250);
+  --sidebar-foreground: oklch(0.3 0.02 260);
+  --sidebar-accent: oklch(0.95 0.02 255);
+  --sidebar-accent-foreground: oklch(0.35 0.12 258);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1200px; height: 900px; overflow: hidden; }
+body {
+  background: var(--brand);
+  font-family: 'Roboto', system-ui, sans-serif;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+.ic { flex-shrink: 0; display: inline-block; vertical-align: middle; }
+
+/* Caption: Wix recommends Roboto 20, black or white. */
+.cap { position: absolute; left: 72px; right: 72px; top: 56px; color: #fff; }
+.cap h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.15; }
+.cap p { font-size: 20px; line-height: 1.4; margin-top: 10px; color: rgba(255,255,255,.88); max-width: 860px; }
+
+/* Dashboard window, bleeding off the bottom edge. */
+.win {
+  position: absolute; left: 72px; right: 72px; top: 196px; height: 760px;
+  background: var(--background); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(10, 20, 60, .35), 0 0 0 1px rgba(255,255,255,.15);
+  display: flex; flex-direction: column; font-size: 15px;
+}
+.chrome { height: 38px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 16px; flex-shrink: 0; }
+.chrome span { width: 11px; height: 11px; border-radius: 50%; background: oklch(0.88 0.01 250); }
+.app { flex: 1; display: flex; min-height: 0; }
+.side { width: 232px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 18px 14px; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; }
+.logo { display: flex; align-items: center; gap: 10px; padding: 0 6px; font-weight: 700; font-size: 14px; line-height: 1.2; }
+.logo b { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav { list-style: none; display: grid; gap: 2px; }
+.nav li { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 8px; color: var(--sidebar-foreground); font-weight: 500; font-size: 14.5px; }
+.nav li.on { background: var(--sidebar-accent); color: var(--sidebar-accent-foreground); }
+.main { flex: 1; padding: 26px 30px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.ph h2 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+.ph p { color: var(--muted-foreground); margin-top: 4px; font-size: 14.5px; }
+.row { display: flex; gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.card h3 { font-size: 15.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.muted { color: var(--muted-foreground); }
+.badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.badge.ok { background: var(--success-soft); color: oklch(0.42 0.12 155); }
+.badge.soft { background: var(--muted); color: var(--sidebar-foreground); }
+.badge.info { background: var(--accent); color: var(--accent-foreground); }
+.badge.warn { background: var(--warning-soft); color: oklch(0.45 0.1 65); }
+.badge.bad { background: var(--destructive-soft); color: oklch(0.5 0.2 27); }
+.btn { display: inline-flex; align-items: center; gap: 7px; border-radius: 8px; padding: 9px 15px; font-weight: 600; font-size: 14px; background: var(--primary); color: #fff; white-space: nowrap; }
+.btn.out { background: #fff; color: var(--foreground); border: 1px solid var(--border); }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13.5px; font-weight: 600; }
+.input { border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; background: #fff; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.input .unit { margin-left: auto; color: var(--muted-foreground); font-size: 13px; }
+.hint { font-size: 12.5px; color: var(--muted-foreground); }
+.switch { width: 38px; height: 22px; border-radius: 999px; background: var(--primary); position: relative; flex-shrink: 0; }
+.switch::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 2px; right: 2px; }
+.switch.off { background: oklch(0.85 0.01 250); }
+.switch.off::after { right: auto; left: 2px; }
+table { width: 100%; border-collapse: collapse; }
+th { white-space: nowrap; text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted-foreground); padding: 0 10px 10px; border-bottom: 1px solid var(--border); }
+td { white-space: nowrap; padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 14.5px; }
+tr:last-child td { border-bottom: 0; }
+.num { font-variant-numeric: tabular-nums; }

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Delivery zones</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .loc { flex: 1; display: flex; gap: 14px; align-items: flex-start; }
+  .pin { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .loc .t { font-weight: 600; font-size: 15.5px; display: flex; gap: 8px; align-items: center; }
+  .loc .a { font-size: 13.5px; color: var(--muted-foreground); margin-top: 3px; }
+  .loc .b { display: flex; gap: 6px; margin-top: 10px; }
+  .sec { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted-foreground); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: var(--muted); border-radius: 5px; padding: 2px 6px; }
+</style>
+</head>
+<body>
+  <div class="cap">
+    <h1>Deliver only where you want</h1>
+    <p>Price from your store or warehouse, cap the distance, and limit delivery to the areas you serve.</p>
+  </div>
+  <div class="win">
+    <div class="chrome"><span></span><span></span><span></span></div>
+    <div class="app">
+      <aside class="side" data-active="zones"></aside>
+      <div class="main">
+        <div class="sec">Fulfillment locations</div>
+        <div class="row">
+          <div class="card loc">
+            <span class="pin"><i data-i="store" data-s="20"></i></span>
+            <div><div class="t">Downtown store <span class="badge info">Primary</span></div>
+              <div class="a">600 Congress Ave, Austin, TX 78701</div>
+              <div class="b"><span class="badge ok"><i data-i="badge-check" data-s="13"></i>Address verified</span><span class="badge soft">Radius 30 mi</span></div></div>
+          </div>
+          <div class="card loc">
+            <span class="pin"><i data-i="package" data-s="20"></i></span>
+            <div><div class="t">North warehouse</div>
+              <div class="a">12400 N Lamar Blvd, Austin, TX 78753</div>
+              <div class="b"><span class="badge ok"><i data-i="badge-check" data-s="13"></i>Address verified</span><span class="badge soft">Radius 40 mi</span></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;margin-top:6px"><div class="sec" style="flex:1">Delivery zones</div><span class="btn"><i data-i="plus"></i>Add zone</span></div>
+        <div class="card" style="padding:14px 10px">
+          <table>
+            <tr><th>Zone</th><th>Type</th><th>Areas</th><th>Max distance</th></tr>
+            <tr><td><b>Greater Austin</b></td><td><span class="badge ok">Service area</span></td><td><code>787*</code> <code>786*</code></td><td class="num">30 mi</td></tr>
+            <tr><td><b>Hill Country</b></td><td><span class="badge ok">Service area</span></td><td><code>78620</code> <code>78669</code> <code>78738</code></td><td class="num">45 mi</td></tr>
+            <tr><td><b>Airport cargo area</b></td><td><span class="badge bad">Exclusion</span></td><td><code>78719</code></td><td class="muted">—</td></tr>
+            <tr><td><b>Round Rock &amp; Georgetown</b></td><td><span class="badge ok">Service area</span></td><td><code>78664</code> <code>78626</code> <code>78628</code></td><td class="num">35 mi</td></tr>
+            <tr><td><b>University campus</b></td><td><span class="badge bad">Exclusion</span></td><td><code>78712</code></td><td class="muted">—</td></tr>
+          </table>
+        </div>
+        <p class="hint" style="font-size:13.5px"><i data-i="shield-check" data-s="14"></i> Exclusions always win. When any service area exists, destinations must be inside one.</p>
+      </div>
+    </div>
+  </div>
+<script src="shell.js"></script><script src="icons.js"></script>
+</body>
+</html>
