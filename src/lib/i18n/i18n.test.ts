@@ -50,7 +50,7 @@ describe('English resources cover the UI', () => {
       ],
       'billing.status': ['active', 'trial', 'cancelling', 'expired', 'free', 'override', 'unknown'],
       'billing.features': Object.keys(PLAN_LIMITS.pro),
-      'common.planNames': ['none', 'basic', 'pro'],
+      'common.planNames': ['none', 'basic', 'pro', 'business'],
       'overview.health': ['healthy', 'degraded', 'down', 'not_configured', 'idle', 'healthyDesc', 'degradedDesc', 'downDesc', 'not_configuredDesc', 'idleDesc'],
       'logs.statuses': ['all', 'priced', 'no_rate', 'fallback', 'error'],
       'logs.sources': ['all', 'checkout', 'simulator'],

@@ -57,7 +57,7 @@ async function setup(gw = new MemoryGateway()) {
 const opts = (repos: Repositories, overrides: Partial<RunOptions> = {}): RunOptions => ({
   repos,
   provider: provider(),
-  entitlementConfig: { basicPackages: ['basic'], proPackages: ['pro'], overrideInstanceIds: [], now },
+  entitlementConfig: { proPackages: ['pro'], businessPackages: ['business'], overrideInstanceIds: [], now },
   budgetMs: 4000,
   rolloutAllowed: true,
   requestId: 'wix-request-123',
@@ -77,7 +77,8 @@ describe('runQuote', () => {
 
     const stored = JSON.stringify([...(gw.tables.get(COLLECTIONS.logs)?.values() ?? [])]);
     expect(stored).not.toMatch(/Congress|78701|wix-request-123/);
-    expect((await repos.billing.get())?.usageCount).toBe(2);
+    // Two provider calls (geocode + matrix) are one lookup.
+    expect((await repos.billing.get())?.usageCount).toBe(1);
   });
 
   it('stores full, JSON-safe diagnostics in the log details', async () => {
@@ -122,7 +123,7 @@ describe('runQuote', () => {
     const o = opts(repos);
     await runQuote(request, o);
     await runQuote(request, o);
-    expect((await repos.billing.get())?.usageCount).toBe(2);
+    expect((await repos.billing.get())?.usageCount).toBe(1);
   });
 
   it('offers nothing (never throws) when Wix Data is unavailable', async () => {

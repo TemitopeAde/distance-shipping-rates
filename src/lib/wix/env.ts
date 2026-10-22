@@ -2,6 +2,7 @@
  * Typed accessors over the server environment. Backend-only.
  */
 import { parseList, type EntitlementConfig } from '../billing/entitlements';
+import type { PaidPlanId } from '../billing/plans';
 import { createRoutingProvider } from '../routing';
 import type { RoutingProvider } from '../routing/types';
 import { getServerEnv } from './runtime-env';
@@ -33,8 +34,8 @@ export function routingConfigured(): boolean {
 export function entitlementConfig(now = new Date()): EntitlementConfig {
   const env = getServerEnv();
   return {
-    basicPackages: parseList(env.PLAN_PACKAGE_BASIC),
     proPackages: parseList(env.PLAN_PACKAGE_PRO),
+    businessPackages: parseList(env.PLAN_PACKAGE_BUSINESS),
     overrideInstanceIds: parseList(env.ENTITLEMENT_OVERRIDE_INSTANCE_IDS),
     now,
   };
@@ -57,8 +58,8 @@ export function checkoutBudgetMs(): number {
   return Math.min(Math.max(getServerEnv().CHECKOUT_BUDGET_MS, 1500), 8000);
 }
 
-export function packageIdFor(plan: 'basic' | 'pro'): string {
+export function packageIdFor(plan: PaidPlanId): string {
   const env = getServerEnv();
-  const list = parseList(plan === 'pro' ? env.PLAN_PACKAGE_PRO : env.PLAN_PACKAGE_BASIC);
+  const list = parseList(plan === 'business' ? env.PLAN_PACKAGE_BUSINESS : env.PLAN_PACKAGE_PRO);
   return list[0] ?? plan;
 }

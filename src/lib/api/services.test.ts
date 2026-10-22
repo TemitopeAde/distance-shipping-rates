@@ -43,13 +43,15 @@ function provider(): RoutingProvider {
   };
 }
 
-function deps(plan: 'basic' | 'pro' | null = 'pro', gw = new MemoryGateway(), instanceId = 'inst'): ServiceDeps {
-  const row: BillingRow = { snapshot: plan ? snapshot(plan) : snapshot(null, true), usageMonth: '', usageCount: 0, lastEventType: null, lastEventAt: null };
+/** 'basic' is a free install; null is a site whose plan couldn't be confirmed. */
+function deps(plan: 'basic' | 'pro' | 'business' | null = 'pro', gw = new MemoryGateway(), instanceId = 'inst'): ServiceDeps {
+  const snap = plan === null ? null : plan === 'basic' ? snapshot(null, true) : snapshot(plan);
+  const row: BillingRow = { snapshot: snap, usageMonth: '', usageCount: 0, lastEventType: null, lastEventAt: null };
   return {
     repos: createRepositories(gw, instanceId),
     provider: provider(),
     providerId: 'google',
-    entitlementConfig: { basicPackages: ['basic'], proPackages: ['pro'], overrideInstanceIds: [], now },
+    entitlementConfig: { proPackages: ['pro'], businessPackages: ['business'], overrideInstanceIds: [], now },
     loadBilling: async () => row,
     refreshBilling: async () => row,
     rolloutMode: 'all',
@@ -111,8 +113,9 @@ describe('locations', () => {
 });
 
 describe('rules', () => {
-  it('blocks advanced rules on Basic', async () => {
-    await expect(saveRule(deps('basic'), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).rejects.toBeInstanceOf(ApiError);
+  it('allows advanced rules on Basic but not without a confirmed plan', async () => {
+    await expect(saveRule(deps('basic'), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).resolves.toMatchObject({ name: 'R' });
+    await expect(saveRule(deps(null), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).rejects.toBeInstanceOf(ApiError);
   });
 
   it('activating a demo rule clears its demo flag', async () => {
@@ -139,10 +142,10 @@ describe('rules', () => {
 });
 
 describe('zones', () => {
-  it('requires Pro to create zones', async () => {
+  it('allows zones on every plan but not without a confirmed plan', async () => {
     const zone = zoneInputSchema.parse({ name: 'Z', type: 'include', countries: ['US'] });
-    await expect(saveZone(deps('basic'), zone)).rejects.toMatchObject({ code: 'plan_limit_zones' });
-    await expect(saveZone(deps('pro'), zone)).resolves.toMatchObject({ name: 'Z' });
+    await expect(saveZone(deps(null), zone)).rejects.toMatchObject({ code: 'plan_limit_zones' });
+    await expect(saveZone(deps('basic'), zone)).resolves.toMatchObject({ name: 'Z' });
   });
 });
 
@@ -152,7 +155,7 @@ describe('settings', () => {
     const before = await d.repos.settings.get();
     const s = await updateSettings(d, { ...before, logRetentionDays: 90 });
     expect(s.settingsVersion).toBe(before.settingsVersion + 1);
-    expect(s.logRetentionDays).toBe(14);
+    expect(s.logRetentionDays).toBe(7);
     expect(s.onboarding.settingsReviewed).toBe(true);
   });
 
@@ -184,7 +187,7 @@ describe('go live', () => {
     expect((await onboardingAction(d, 'pause')).pluginEnabled).toBe(false);
   });
 
-  it('refuses without a paid plan', async () => {
+  it('refuses without a confirmed plan', async () => {
     const d = deps(null);
     await saveLocation(d, locationInput);
     await saveRule(d, ruleInput());

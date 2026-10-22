@@ -33,8 +33,8 @@ export interface Entitlement {
 }
 
 export interface EntitlementConfig {
-  basicPackages: string[];
   proPackages: string[];
+  businessPackages: string[];
   overrideInstanceIds: string[];
   now: Date;
 }
@@ -58,11 +58,11 @@ export function isWixStaffOwner(owner: { email?: string | null; emailStatus?: st
   return email.endsWith('@wix.com') && (owner?.emailStatus ?? '').startsWith('VERIFIED');
 }
 
-export function planForPackage(packageName: string | null, cfg: Pick<EntitlementConfig, 'basicPackages' | 'proPackages'>): PlanId {
+export function planForPackage(packageName: string | null, cfg: Pick<EntitlementConfig, 'proPackages' | 'businessPackages'>): PlanId {
   if (!packageName) return 'none';
   const name = packageName.toLowerCase();
+  if (cfg.businessPackages.some((p) => p.toLowerCase() === name)) return 'business';
   if (cfg.proPackages.some((p) => p.toLowerCase() === name)) return 'pro';
-  if (cfg.basicPackages.some((p) => p.toLowerCase() === name)) return 'basic';
   return 'none';
 }
 
@@ -76,12 +76,13 @@ const make = (plan: PlanId, status: EntitlementStatus, accessUntil: string | nul
 
 export function resolveEntitlement(instanceId: string, snapshot: BillingSnapshot | null, cfg: EntitlementConfig): Entitlement {
   // Developer/testing override: an explicit server-side allowlist of instance IDs (secret env var).
-  if (instanceId && cfg.overrideInstanceIds.includes(instanceId)) return make('pro', 'override');
+  if (instanceId && cfg.overrideInstanceIds.includes(instanceId)) return make('business', 'override');
   if (!snapshot) return make('none', 'unknown');
   if (cfg.now.getTime() - Date.parse(snapshot.fetchedAt) > MAX_SNAPSHOT_AGE_MS) return make('none', 'unknown');
   // Wix staff sites get all access without a plan (e.g. App Market review and internal testing).
-  if (snapshot.ownerIsWixStaff) return { ...make('pro', 'override'), limits: STAFF_LIMITS };
-  if (snapshot.isFree) return make('none', 'free');
+  if (snapshot.ownerIsWixStaff) return { ...make('business', 'override'), limits: STAFF_LIMITS };
+  // A free install is the Basic plan.
+  if (snapshot.isFree) return make('basic', 'free');
 
   const plan = planForPackage(snapshot.packageName, cfg);
   if (plan === 'none') return make('none', 'unknown', null, snapshot.packageName);

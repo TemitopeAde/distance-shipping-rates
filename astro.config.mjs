@@ -18,8 +18,8 @@ export default defineConfig({
       ROUTING_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
       // Geoapify key used only for dashboard address autocomplete (proxied by /api/address-suggest).
       AUTOCOMPLETE_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
-      PLAN_PACKAGE_BASIC: envField.string({ context: "server", access: "public", default: "basic" }),
       PLAN_PACKAGE_PRO: envField.string({ context: "server", access: "public", default: "pro" }),
+      PLAN_PACKAGE_BUSINESS: envField.string({ context: "server", access: "public", default: "business" }),
       ENTITLEMENT_OVERRIDE_INSTANCE_IDS: envField.string({ context: "server", access: "secret", optional: true }),
       ROLLOUT_MODE: envField.enum({ context: "server", access: "public", values: ["all", "allowlist", "off"], default: "all" }),
       ROLLOUT_ALLOWLIST: envField.string({ context: "server", access: "secret", optional: true }),

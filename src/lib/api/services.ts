@@ -5,7 +5,7 @@
  */
 import { resolveEntitlement, ruleExceedsPlan, type Entitlement, type EntitlementConfig } from '../billing/entitlements';
 import { seedOnboarding } from '../billing/lifecycle';
-import { PLAN_LIMITS } from '../billing/plans';
+import { PLAN_LIMITS, type PaidPlanId } from '../billing/plans';
 import { usageThisMonth } from '../billing/usage';
 import type { BillingRow, Repositories } from '../data/repositories';
 import { detectRuleConflicts } from '../shipping/engine';
@@ -40,7 +40,7 @@ export interface ServiceDeps {
   rolloutMode: string;
   rolloutAllowed: boolean;
   budgetMs: number;
-  getCheckoutUrl: (plan: 'basic' | 'pro', billingCycle: 'MONTHLY' | 'YEARLY') => Promise<string>;
+  getCheckoutUrl: (plan: PaidPlanId, billingCycle: 'MONTHLY' | 'YEARLY') => Promise<string>;
   now?: () => Date;
 }
 
@@ -284,11 +284,11 @@ export async function getBilling(d: ServiceDeps, opts: { refresh: boolean }) {
     entitlement,
     snapshot: billing.snapshot,
     usage: { used: usageThisMonth(billing, nowOf(d)), limit: entitlement.limits.monthlyLookups },
-    plans: { basic: PLAN_LIMITS.basic, pro: PLAN_LIMITS.pro },
+    plans: { basic: PLAN_LIMITS.basic, pro: PLAN_LIMITS.pro, business: PLAN_LIMITS.business },
   };
 }
 
-export async function checkoutUrl(d: ServiceDeps, plan: 'basic' | 'pro', billingCycle: 'MONTHLY' | 'YEARLY') {
+export async function checkoutUrl(d: ServiceDeps, plan: PaidPlanId, billingCycle: 'MONTHLY' | 'YEARLY') {
   try {
     return { url: await d.getCheckoutUrl(plan, billingCycle) };
   } catch {

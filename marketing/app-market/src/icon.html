@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>App icon</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  /* App icon: 1000x1000, solid background, no frame, no text. Wix rounds the corners itself. */
+  html, body { width: 1000px; height: 1000px; }
+  svg { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+  <svg width="1000" height="1000" viewBox="0 0 1000 1000">
+    <!-- Road route from origin to destination, as drawn on the dashboard map. -->
+    <path d="M250 760 L250 600 L500 600 L500 400 L750 400 L750 300" fill="none" stroke="#fff" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="250" cy="760" r="64" fill="#fff"/>
+    <circle cx="250" cy="760" r="26" fill="oklch(0.42 0.17 260)"/>
+    <g transform="translate(750 300)">
+      <path d="M0 0 C -58 -72 -66 -86 -66 -124 A66 66 0 1 1 66 -124 C 66 -86 58 -72 0 0Z" fill="oklch(0.6 0.2 30)" stroke="#fff" stroke-width="14"/>
+      <circle cy="-126" r="24" fill="#fff"/>
+    </g>
+    <!-- Truck on the route, in a white tile. -->
+    <rect x="356" y="456" width="288" height="288" rx="72" fill="#fff" style="filter:drop-shadow(0 24px 40px rgba(10,20,60,.35))"/>
+    <g transform="translate(404 504) scale(8)" fill="none" stroke="oklch(0.52 0.19 258)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>
+    </g>
+  </svg>
+</body>
+</html>

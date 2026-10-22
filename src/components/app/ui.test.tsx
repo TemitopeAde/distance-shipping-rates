@@ -11,11 +11,12 @@ const { COUNTRY_CODES } = await import('../../lib/location/countries-now');
 const { __setFetcher } = await import('./api-client');
 const { __setLocationFetcher } = await import('../../lib/location/countries-now');
 const { AppContext } = await import('./context');
-const { OfflineNotice, Field } = await import('./common');
+const { OfflineNotice, Field, LookupsRemaining } = await import('./common');
 const { TooltipProvider, Input } = await import('../ui/primitives');
 const { Button } = await import('../ui/button');
 const { LocationsPage } = await import('./pages/LocationsPage');
 const { AppShell } = await import('./AppShell');
+const { CountryMultiSelect } = await import('./CountrySelect');
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -96,6 +97,32 @@ describe('Dashboard tooltips', () => {
     expect((await screen.findByRole('tooltip')).textContent).toBe(hint);
     fireEvent.click(help);
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe('LookupsRemaining', () => {
+  it('shows how many lookups are left and warns when none are', () => {
+    const { rerender } = render(withProviders(<LookupsRemaining usage={{ used: 3, limit: 10 }} locale="en" />));
+    expect(screen.getByText('7 lookups left this month')).toBeTruthy();
+    rerender(withProviders(<LookupsRemaining usage={{ used: 12, limit: 10 }} locale="en" />));
+    expect(screen.getByText(/No lookups left this month/).className).toContain('text-destructive');
+  });
+});
+
+describe('CountryMultiSelect', () => {
+  it('adds countries from the dropdown and removes them with their chip', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(withProviders(<CountryMultiSelect id="c" value={['US']} onChange={onChange} />));
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    // Chosen countries leave the list, and the dropdown always resets to its prompt.
+    expect([...select.options].some((o) => o.value === 'US')).toBe(false);
+    expect(select.value).toBe('');
+    fireEvent.change(select, { target: { value: 'CA' } });
+    expect(onChange).toHaveBeenLastCalledWith(['US', 'CA']);
+
+    rerender(withProviders(<CountryMultiSelect id="c" value={['US', 'CA']} onChange={onChange} />));
+    fireEvent.click(screen.getByRole('button', { name: /Remove United States/ }));
+    expect(onChange).toHaveBeenLastCalledWith(['CA']);
   });
 });
 

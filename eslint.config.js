@@ -20,4 +20,9 @@ export default tseslint.config(
     files: ['**/*.test.{ts,tsx}', 'tests/**'],
     rules: { '@typescript-eslint/no-explicit-any': 'off' },
   },
+  {
+    // App Market mockups: plain browser scripts rendered by headless Chrome.
+    files: ['marketing/**/*.js'],
+    languageOptions: { globals: { window: 'readonly', document: 'readonly' } },
+  },
 );

@@ -6,6 +6,7 @@ import { Button } from '../../ui/button';
 import { ConfirmDialog, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../ui/dialog';
 import { Alert, AlertDescription, Badge, Card, CardContent, Input, Label, NativeSelect, Switch, Textarea } from '../../ui/primitives';
 import { api } from '../api-client';
+import { CountryMultiSelect } from '../CountrySelect';
 import { EmptyState, ErrorState, Field, LoadingState, PageHeader } from '../common';
 import { useApp } from '../context';
 import { listFromText, number } from '../format';
@@ -16,19 +17,19 @@ interface ZoneForm {
   name: string;
   type: 'include' | 'exclude';
   active: boolean;
-  countries: string;
+  countries: string[];
   subdivisions: string;
   postalPatterns: string;
   maxDistance: string;
 }
 
-const blank: ZoneForm = { name: '', type: 'include', active: true, countries: '', subdivisions: '', postalPatterns: '', maxDistance: '' };
+const blank: ZoneForm = { name: '', type: 'include', active: true, countries: [], subdivisions: '', postalPatterns: '', maxDistance: '' };
 
 const toForm = (z: DeliveryZone): ZoneForm => ({
   name: z.name,
   type: z.type,
   active: z.active,
-  countries: z.countries.join(', '),
+  countries: z.countries,
   subdivisions: z.subdivisions.join(', '),
   postalPatterns: z.postalPatterns.join('\n'),
   maxDistance: z.maxDistance === null ? '' : String(z.maxDistance),
@@ -38,18 +39,27 @@ const toInput = (f: ZoneForm) => ({
   name: f.name,
   type: f.type,
   active: f.active,
-  countries: listFromText(f.countries).map((c) => c.toUpperCase()),
+  countries: f.countries,
   subdivisions: listFromText(f.subdivisions).map((c) => c.toUpperCase()),
   postalPatterns: listFromText(f.postalPatterns),
   maxDistance: f.type === 'include' ? numOrNull(f.maxDistance) : null,
 });
+
+/** Preset zone distance limits, in the merchant's unit. */
+const DISTANCE_PRESETS = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200];
+
+/** Presets plus a saved value that isn't one of them, so editing never drops it. */
+const distanceOptions = (current: string) => {
+  const n = Number(current);
+  return current && Number.isFinite(n) && !DISTANCE_PRESETS.includes(n) ? [...DISTANCE_PRESETS, n].sort((a, b) => a - b) : DISTANCE_PRESETS;
+};
 
 /** Maps array-item errors (e.g. postalPatterns.2) back to the field. */
 const firstError = (errors: FieldErrors, field: string) => errors[field] ?? Object.entries(errors).find(([k]) => k.startsWith(`${field}.`))?.[1];
 
 function ZoneEditor({ initial, id, onDone }: { initial: ZoneForm; id: string | null; onDone: (saved: boolean) => void }) {
   const { t } = useTranslation();
-  const { unit } = useApp();
+  const { unit, locale } = useApp();
   const [f, setF] = useState(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
   const { busy, run } = useAction();
@@ -84,7 +94,7 @@ function ZoneEditor({ initial, id, onDone }: { initial: ZoneForm; id: string | n
         </Field>
       </div>
       <Field id="z-countries" label={t('zones.countries')} hint={t('zones.countriesHint')} optional error={firstError(errors, 'countries')}>
-        <Input value={f.countries} onChange={(e) => set('countries', e.target.value)} dir="ltr" />
+        <CountryMultiSelect value={f.countries} onChange={(codes) => set('countries', codes)} />
       </Field>
       <Field id="z-subs" label={t('zones.subdivisions')} hint={t('zones.subdivisionsHint')} optional error={firstError(errors, 'subdivisions')}>
         <Input value={f.subdivisions} onChange={(e) => set('subdivisions', e.target.value)} dir="ltr" />
@@ -94,7 +104,14 @@ function ZoneEditor({ initial, id, onDone }: { initial: ZoneForm; id: string | n
       </Field>
       {f.type === 'include' && (
         <Field id="z-maxd" label={t('zones.maxDistance', { unit: t(`common.units.${unit}`) })} optional error={errors.maxDistance}>
-          <Input inputMode="decimal" value={f.maxDistance} onChange={(e) => set('maxDistance', e.target.value)} />
+          <NativeSelect value={f.maxDistance} onChange={(e) => set('maxDistance', e.target.value)}>
+            <option value="">{t('zones.noDistanceLimit')}</option>
+            {distanceOptions(f.maxDistance).map((d) => (
+              <option key={d} value={String(d)}>
+                {number(d, locale, 1)} {t(`common.units.${unit}`)}
+              </option>
+            ))}
+          </NativeSelect>
         </Field>
       )}
       <Label className="font-normal">

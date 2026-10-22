@@ -159,6 +159,10 @@ export function AddressAutocomplete({ id, value, onChange, onSelect, country, au
               <span className="min-w-0">{s.formatted}</span>
             </li>
           ))}
+          {/* Required by Geoapify's terms on the free plan; suggestions always come from Geoapify. */}
+          <li role="presentation" className="text-muted-foreground border-t px-3 pt-1.5 pb-0.5 text-end text-[11px]">
+            {t('address.attribution')}
+          </li>
         </ul>
       )}
     </div>

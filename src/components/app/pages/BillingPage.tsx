@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, ExternalLink, Minus, RefreshCw } from 'lucide-react';
-import type { PlanLimits } from '../../../lib/billing/plans';
+import type { PaidPlanId, PlanLimits } from '../../../lib/billing/plans';
 import { Button } from '../../ui/button';
 import {
   Alert,
@@ -24,13 +24,14 @@ import {
   TableRow,
 } from '../../ui/primitives';
 import { api } from '../api-client';
-import { ErrorState, LoadingState, PageHeader } from '../common';
+import { ErrorState, LoadingState, LookupsRemaining, PageHeader } from '../common';
 import { useApp } from '../context';
 import { date, number } from '../format';
 import { useAction, useResource } from '../hooks';
 import type { BillingResponse } from '../types';
 
 const FEATURES: Array<keyof PlanLimits> = ['checkout', 'maxLocations', 'maxRules', 'advancedRules', 'zones', 'monthlyLookups', 'maxLogRetentionDays'];
+const PLANS = ['basic', 'pro', 'business'] as const;
 
 function FeatureValue({ value, locale }: { value: number | boolean; locale: string }) {
   if (typeof value === 'boolean') {
@@ -47,7 +48,7 @@ export function BillingPage() {
   const [cycle, setCycle] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   const { busy, run } = useAction();
 
-  const upgrade = async (plan: 'basic' | 'pro') => {
+  const upgrade = async (plan: PaidPlanId) => {
     const res = await run(() => api<{ url: string }>('billing/checkout-url', { method: 'POST', body: { plan, billingCycle: cycle } }));
     if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer');
   };
@@ -95,6 +96,7 @@ export function BillingPage() {
               </CardHeader>
               <CardContent className="grid gap-2">
                 <Progress value={Math.min(100, (data.usage.used / Math.max(1, data.usage.limit)) * 100)} aria-label={t('billing.usage')} />
+                <LookupsRemaining usage={data.usage} locale={locale} />
                 <p className="text-muted-foreground text-xs">{t('overview.usageHint')}</p>
               </CardContent>
             </Card>
@@ -117,34 +119,32 @@ export function BillingPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead />
-                    <TableHead>{t('common.planNames.basic')}</TableHead>
-                    <TableHead>{t('common.planNames.pro')}</TableHead>
+                    {PLANS.map((p) => (
+                      <TableHead key={p}>{t(`common.planNames.${p}`)}</TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {FEATURES.map((f) => (
                     <TableRow key={f}>
                       <TableCell className="whitespace-normal">{t(`billing.features.${f}`)}</TableCell>
-                      <TableCell>
-                        <FeatureValue value={data.plans.basic[f]} locale={locale} />
-                      </TableCell>
-                      <TableCell>
-                        <FeatureValue value={data.plans.pro[f]} locale={locale} />
-                      </TableCell>
+                      {PLANS.map((p) => (
+                        <TableCell key={p}>
+                          <FeatureValue value={data.plans[p][f]} locale={locale} />
+                        </TableCell>
+                      ))}
                     </TableRow>
                   ))}
                   <TableRow>
                     <TableCell />
-                    <TableCell>
-                      <Button variant={ent.plan === 'basic' ? 'outline' : 'default'} disabled={ent.plan === 'basic' && ent.status !== 'cancelling'} loading={busy} onClick={() => void upgrade('basic')}>
-                        {t('billing.choose', { plan: t('common.planNames.basic') })} <ExternalLink />
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button disabled={ent.plan === 'pro' && ent.status !== 'cancelling'} loading={busy} onClick={() => void upgrade('pro')}>
-                        {t('billing.choose', { plan: t('common.planNames.pro') })} <ExternalLink />
-                      </Button>
-                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{t('billing.freePlan')}</TableCell>
+                    {(['pro', 'business'] as const).map((p) => (
+                      <TableCell key={p}>
+                        <Button disabled={ent.plan === p && ent.status !== 'cancelling'} loading={busy} onClick={() => void upgrade(p)}>
+                          {t('billing.choose', { plan: t(`common.planNames.${p}`) })} <ExternalLink />
+                        </Button>
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </TableBody>
               </Table>

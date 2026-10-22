@@ -55,7 +55,7 @@ Date: 2026-10-15. Scope: `plan.md`, delivered in phases (engine/routing/plugin/d
 
 1. `wix env set` for `ROUTING_API_KEY` (Google key with Geocoding API + Routes API), and optionally the other variables in `.env.example`.
 2. Add the permission scopes in `docs/wix-permissions.md`.
-3. Create the Basic/Pro plans in the App Dashboard and set `PLAN_PACKAGE_BASIC/PRO`. Configure an external pricing page if you want in-app upgrade buttons.
+3. Offer a free plan (Basic), create the Pro/Business paid plans in the App Dashboard and set `PLAN_PACKAGE_PRO/BUSINESS`. Configure an external pricing page if you want in-app upgrade buttons.
 4. `wix release --version-type major` (first data collections and events), install on a Premium test site with the CMS, and wait up to 5 minutes for collections.
 5. Enable the app as a carrier with a backup rate in the site's shipping settings, then run the manual checkout table in `docs/test-plan.md`.
 6. Have native speakers review the 19 partial locales, and professionally translate billing and legal text.

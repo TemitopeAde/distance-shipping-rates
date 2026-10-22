@@ -11,8 +11,8 @@ export interface ServerEnv {
   ROUTING_PROVIDER: string;
   ROUTING_API_KEY: string | undefined;
   AUTOCOMPLETE_API_KEY: string | undefined;
-  PLAN_PACKAGE_BASIC: string;
   PLAN_PACKAGE_PRO: string;
+  PLAN_PACKAGE_BUSINESS: string;
   ENTITLEMENT_OVERRIDE_INSTANCE_IDS: string | undefined;
   ROLLOUT_MODE: string;
   ROLLOUT_ALLOWLIST: string | undefined;
@@ -44,8 +44,8 @@ export function getServerEnv(): ServerEnv {
     ROUTING_PROVIDER: fromProcess('ROUTING_PROVIDER') ?? 'google',
     ROUTING_API_KEY: fromProcess('ROUTING_API_KEY'),
     AUTOCOMPLETE_API_KEY: fromProcess('AUTOCOMPLETE_API_KEY'),
-    PLAN_PACKAGE_BASIC: fromProcess('PLAN_PACKAGE_BASIC') ?? 'basic',
     PLAN_PACKAGE_PRO: fromProcess('PLAN_PACKAGE_PRO') ?? 'pro',
+    PLAN_PACKAGE_BUSINESS: fromProcess('PLAN_PACKAGE_BUSINESS') ?? 'business',
     ENTITLEMENT_OVERRIDE_INSTANCE_IDS: fromProcess('ENTITLEMENT_OVERRIDE_INSTANCE_IDS'),
     ROLLOUT_MODE: fromProcess('ROLLOUT_MODE') ?? 'all',
     ROLLOUT_ALLOWLIST: fromProcess('ROLLOUT_ALLOWLIST'),

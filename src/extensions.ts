@@ -21,5 +21,9 @@ import billingReactivated from './extensions/backend/events/billing-reactivated/
 
 import billingTransferred from './extensions/backend/events/billing-transferred/billing-transferred.extension.ts';
 
+import ariaTools from './extensions/backend/app-tools/aria-tools/aria-tools.extension.ts';
+
+import ariaToolsProvider from './extensions/backend/service-plugins/aria-tools-provider/aria-tools-provider.extension.ts';
+
 export default app()
-  .use(distanceShippingPage).use(distanceRates).use(dataCollections).use(billingInstalled).use(billingRemoved).use(billingPurchased).use(billingChanged).use(billingCancelled).use(billingConverted).use(billingReactivated).use(billingTransferred);
+  .use(distanceShippingPage).use(distanceRates).use(dataCollections).use(billingInstalled).use(billingRemoved).use(billingPurchased).use(billingChanged).use(billingCancelled).use(billingConverted).use(billingReactivated).use(billingTransferred).use(ariaTools).use(ariaToolsProvider);

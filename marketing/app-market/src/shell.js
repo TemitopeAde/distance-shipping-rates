@@ -9,6 +9,7 @@ const NAV = [
   ['logs', 'activity', 'Calculations & logs'],
   ['billing', 'credit-card', 'Billing'],
   ['settings', 'settings', 'Settings'],
+  ['help', 'circle-question-mark', 'Help'],
 ];
 document.querySelectorAll('aside.side').forEach((el) => {
   const active = el.dataset.active;

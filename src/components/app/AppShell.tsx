@@ -22,7 +22,7 @@ import { Button } from '../ui/button';
 import { Dialog, DialogTitle, SheetContent } from '../ui/dialog';
 import { Badge, NativeSelect, TooltipProvider } from '../ui/primitives';
 import { cn } from '../ui/utils';
-import { OfflineNotice } from './common';
+import { LookupsRemaining, OfflineNotice } from './common';
 import { AppContext, PAGES, type PageId } from './context';
 import { useResource } from './hooks';
 import type { BillingResponse } from './types';
@@ -113,8 +113,8 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
   const settings = useResource<MerchantSettings>('settings');
   const billing = useResource<BillingResponse>('billing');
   const plan = billing.data?.entitlement.plan;
-  // Pro (including overrides) has nothing above it; hidden until billing loads so it never flickers.
-  const canUpgrade = plan !== undefined && plan !== 'pro';
+  // Business (including overrides) has nothing above it; hidden until billing loads so it never flickers.
+  const canUpgrade = plan !== undefined && plan !== 'business';
 
   useEffect(() => {
     const onHash = () => setPage(pageFromHash());
@@ -157,12 +157,15 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
         {live ? t('nav.status.live') : t('nav.status.paused')}
       </Badge>
       <NavList page={page} onSelect={navigate} />
-      {canUpgrade && (
+      {billing.data && plan && (
         <div className="bg-card mx-2 grid gap-2 rounded-lg border p-3">
           <p className="text-muted-foreground text-xs">{t('nav.currentPlan', { plan: t(`common.planNames.${plan}`) })}</p>
-          <Button size="sm" onClick={() => navigate('billing')}>
-            <Sparkles aria-hidden="true" /> {t('nav.upgrade')}
-          </Button>
+          <LookupsRemaining usage={billing.data.usage} locale={locale} className="text-xs" />
+          {canUpgrade && (
+            <Button size="sm" onClick={() => navigate('billing')}>
+              <Sparkles aria-hidden="true" /> {t('nav.upgrade')}
+            </Button>
+          )}
         </div>
       )}
       <div className="mt-auto grid gap-1.5 px-2">

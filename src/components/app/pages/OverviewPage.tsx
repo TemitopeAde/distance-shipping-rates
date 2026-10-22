@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, ArrowRight, CheckCircle2, Circle, CreditCard, Gauge, ListOrdered, MapPin, Plug, RefreshCw } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { Alert, AlertDescription, AlertTitle, Badge, Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle, Progress } from '../../ui/primitives';
-import { ErrorState, LoadingState, PageHeader, StatTile } from '../common';
+import { ErrorState, LoadingState, LookupsRemaining, PageHeader, StatTile } from '../common';
 import { useApp, type PageId } from '../context';
 import { dateTime, number } from '../format';
 import { useResource } from '../hooks';
@@ -88,6 +88,7 @@ export function OverviewPage() {
               hint={
                 <div className="grid gap-1">
                   <Progress value={Math.min(100, (data.usage.used / Math.max(1, data.usage.limit)) * 100)} aria-label={t('overview.usageTitle')} />
+                  <LookupsRemaining usage={data.usage} locale={locale} />
                   <span>{t('overview.usageHint')}</span>
                 </div>
               }

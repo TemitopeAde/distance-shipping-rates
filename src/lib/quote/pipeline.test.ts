@@ -31,7 +31,7 @@ const proSnapshot: BillingSnapshot = {
   freeTrialAvailable: false,
   fetchedAt: now.toISOString(),
 };
-const entitlementCfg = { basicPackages: ['basic'], proPackages: ['pro'], overrideInstanceIds: [], now };
+const entitlementCfg = { proPackages: ['pro'], businessPackages: ['business'], overrideInstanceIds: [], now };
 const pro = resolveEntitlement('inst', proSnapshot, entitlementCfg);
 
 function provider(miles: Array<number | null> = [10], overrides: Partial<RoutingProvider> = {}) {
@@ -180,14 +180,16 @@ describe('computeQuote — never invents charges', () => {
   });
 
   it('explains why each rule did not apply', async () => {
-    const basic = resolveEntitlement('inst', { ...proSnapshot, packageName: 'basic' }, entitlementCfg);
+    // Every current plan includes advanced rules; a plan without them still has to explain the skip.
+    const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+    const noAdvanced = { ...basic, limits: { ...basic.limits, advancedRules: false } };
     const rules = [
       makeRule({ id: 'a', name: 'Sample', isDemo: true, active: false, priority: 1 }),
       makeRule({ id: 'b', name: 'Off', active: false, priority: 2 }),
       makeRule({ id: 'c', name: 'Short range', maxDistance: 5, priority: 3 }),
       makeRule({ id: 'd', name: 'Tiered', priority: 4, mode: 'graduated_tiers', tiers: [{ upTo: null, ratePerUnit: '1', flatFee: '0' }] }),
     ];
-    const out = await computeQuote(request(), deps({ entitlement: basic }, { rules }));
+    const out = await computeQuote(request(), deps({ entitlement: noAdvanced }, { rules }));
     expect(out.kind === 'no_rate' && out.ruleDiagnostics?.map((d) => [d.name, d.reason])).toEqual([
       ['Sample', 'demo'],
       ['Off', 'inactive'],
@@ -256,26 +258,40 @@ describe('computeQuote — outages and fallback policy', () => {
 });
 
 describe('computeQuote — entitlements', () => {
-  it('blocks checkout rates without a plan but allows the simulator', async () => {
-    const none = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+  it('blocks checkout rates without a confirmed plan but allows the simulator', async () => {
+    const none = resolveEntitlement('inst', { ...proSnapshot, packageName: 'mystery' }, entitlementCfg);
     expect(await computeQuote(request(), deps({ entitlement: none }))).toMatchObject({ kind: 'no_rate', reason: 'not_entitled' });
     expect(await computeQuote(request({ source: 'simulator' }), deps({ entitlement: none }))).toMatchObject({ kind: 'rates' });
   });
 
   it('uses the fallback rate on lost access when the merchant chose that', async () => {
-    const none = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+    const none = resolveEntitlement('inst', { ...proSnapshot, packageName: 'mystery' }, entitlementCfg);
     const s = settings({ accessEndBehavior: 'fallback_rate', fallbackRate: { title: 'Delivery', price: '10' } });
     expect(await computeQuote(request(), deps({ entitlement: none }, { settings: s }))).toMatchObject({ kind: 'fallback', reason: 'not_entitled' });
   });
 
-  it('skips advanced rules on Basic instead of repricing them', async () => {
-    const basic = resolveEntitlement('inst', { ...proSnapshot, packageName: 'basic' }, entitlementCfg);
+  it('gives a free Basic install checkout rates', async () => {
+    const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+    expect(basic).toMatchObject({ plan: 'basic', status: 'free' });
+    expect(await computeQuote(request(), deps({ entitlement: basic }))).toMatchObject({ kind: 'rates' });
+  });
+
+  it('skips advanced rules without a confirmed plan instead of repricing them', async () => {
+    const none = resolveEntitlement('inst', { ...proSnapshot, packageName: 'mystery' }, entitlementCfg);
     const tiered = makeRule({ id: 't', mode: 'graduated_tiers', tiers: [{ upTo: null, ratePerUnit: '1', flatFee: '0' }] });
-    expect(await computeQuote(request(), deps({ entitlement: basic }, { rules: [tiered] }))).toMatchObject({ kind: 'no_rate', reason: 'no_matching_rule' });
+    expect(await computeQuote(request({ source: 'simulator' }), deps({ entitlement: none }, { rules: [tiered] }))).toMatchObject({ kind: 'no_rate', reason: 'no_matching_rule' });
+  });
+
+  it('stops new lookups on Basic after its 10th of the month', async () => {
+    const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+    const other = request({ destination: normalizeAddress({ addressLine1: '2 Main', city: 'Austin', postalCode: '78702', country: 'US' }) });
+    expect(await computeQuote(other, deps({ entitlement: basic, usedLookupsThisMonth: 9 }))).toMatchObject({ kind: 'rates' });
+    const third = request({ destination: normalizeAddress({ addressLine1: '3 Main', city: 'Austin', postalCode: '78703', country: 'US' }) });
+    expect(await computeQuote(third, deps({ entitlement: basic, usedLookupsThisMonth: 10 }))).toMatchObject({ kind: 'no_rate', reason: 'quota_exceeded' });
   });
 
   it('limits Basic to one origin', async () => {
-    const basic = resolveEntitlement('inst', { ...proSnapshot, packageName: 'basic' }, entitlementCfg);
+    const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
     const p = provider([10]);
     await computeQuote(
       request(),

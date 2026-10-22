@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Alert, AlertDescription, AlertTitle, Card, CardContent, Label, Skeleton, Tooltip } from '../ui/primitives';
 import { cn } from '../ui/utils';
 import type { ClientApiError } from './api-client';
+import { number } from './format';
 import { useErrorMessage, useOnline, type FieldErrors } from './hooks';
 
 export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: React.ReactNode }) {
@@ -147,5 +148,17 @@ export function StatTile({ label, value, hint, icon }: { label: string; value: R
         {icon && <div className="text-muted-foreground">{icon}</div>}
       </CardContent>
     </Card>
+  );
+}
+
+/** Lookups left this month: amber at 20% or less, red when none are left. */
+export function LookupsRemaining({ usage, locale, className }: { usage: { used: number; limit: number }; locale: string; className?: string }) {
+  const { t } = useTranslation();
+  const remaining = Math.max(0, usage.limit - usage.used);
+  const tone = remaining === 0 ? 'text-destructive' : remaining <= usage.limit * 0.2 ? 'text-warning-foreground' : 'text-foreground';
+  return (
+    <p className={cn('text-sm font-medium', tone, className)}>
+      {remaining === 0 ? t('overview.usageExhausted') : t('overview.usageRemaining', { remaining: number(remaining, locale, 0) })}
+    </p>
   );
 }

@@ -1,9 +1,13 @@
 /**
  * Commercial plan matrix. These are product decisions, not Wix API values:
- * edit freely. The Wix plan (vendor product) IDs created in the App Dashboard
- * are mapped to these plans via PLAN_PACKAGE_BASIC / PLAN_PACKAGE_PRO.
+ * edit freely. Basic is the free plan (a free install on Wix); the paid Wix plan
+ * (vendor product) IDs created in the App Dashboard are mapped to Pro and
+ * Business via PLAN_PACKAGE_PRO / PLAN_PACKAGE_BUSINESS. `none` means the plan
+ * couldn't be confirmed or has expired, and never returns checkout rates.
  */
-export type PlanId = 'none' | 'basic' | 'pro';
+export type PlanId = 'none' | 'basic' | 'pro' | 'business';
+/** Plans bought through Wix checkout; Basic is free and has no Wix package. */
+export type PaidPlanId = 'pro' | 'business';
 
 export interface PlanLimits {
   /** Whether the checkout service plugin may return calculated rates. */
@@ -14,7 +18,7 @@ export interface PlanLimits {
   advancedRules: boolean;
   /** Create/edit delivery zones (existing zones always keep being enforced). */
   zones: boolean;
-  /** Paid routing-provider lookups per calendar month (cache hits are free). */
+  /** New-address routing lookups per calendar month (cache hits are free). */
   monthlyLookups: number;
   maxLogRetentionDays: number;
 }
@@ -26,25 +30,34 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     maxRules: 1,
     advancedRules: false,
     zones: false,
-    monthlyLookups: 25,
+    monthlyLookups: 10,
     maxLogRetentionDays: 7,
   },
   basic: {
     checkout: true,
     maxLocations: 1,
-    maxRules: 3,
-    advancedRules: false,
-    zones: false,
-    monthlyLookups: 1000,
-    maxLogRetentionDays: 14,
+    maxRules: 50,
+    advancedRules: true,
+    zones: true,
+    monthlyLookups: 10,
+    maxLogRetentionDays: 7,
   },
   pro: {
+    checkout: true,
+    maxLocations: 3,
+    maxRules: 50,
+    advancedRules: true,
+    zones: true,
+    monthlyLookups: 1500,
+    maxLogRetentionDays: 30,
+  },
+  business: {
     checkout: true,
     maxLocations: 25,
     maxRules: 50,
     advancedRules: true,
     zones: true,
-    monthlyLookups: 20000,
+    monthlyLookups: 6000,
     maxLogRetentionDays: 90,
   },
 };

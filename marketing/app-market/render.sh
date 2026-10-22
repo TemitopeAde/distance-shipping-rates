@@ -15,6 +15,9 @@ shot() { # file width height scale out
 for f in 1-main 2-overview 3-pricing-rules 4-rate-simulator 5-zones-locations 6-checkout; do
   [[ -f src/$f.html ]] && shot $f.html 1200 900 2 out/$f.png
 done
+if [[ -f src/icon.html ]]; then
+  shot icon.html 1000 1000 1 out/icon.png
+fi
 if [[ -f src/banner.html ]]; then
   shot banner.html 540 360 1 out/banner.png
   shot banner.html 540 360 2 out/banner@2x.png

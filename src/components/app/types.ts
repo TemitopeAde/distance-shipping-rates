@@ -63,7 +63,7 @@ export interface BillingResponse {
     fetchedAt: string;
   } | null;
   usage: { used: number; limit: number };
-  plans: { basic: PlanLimits; pro: PlanLimits };
+  plans: { basic: PlanLimits; pro: PlanLimits; business: PlanLimits };
 }
 
 export interface SerializedOption {

@@ -310,6 +310,6 @@ export const logsQuerySchema = z.object({
 export type LogsQuery = z.infer<typeof logsQuerySchema>;
 
 export const checkoutUrlInputSchema = z.object({
-  plan: z.enum(['basic', 'pro']),
+  plan: z.enum(['pro', 'business']),
   billingCycle: z.enum(['MONTHLY', 'YEARLY']).default('MONTHLY'),
 });

@@ -111,18 +111,20 @@ These invariants are enforced and tested. A fallback price must be greater than 
 - **Source of truth:** `getAppInstance()`. Lifecycle events only trigger a refresh, so duplicate or out-of-order events cannot corrupt state. Exact redeliveries are also skipped through `event-dedupe`.
 - **Plans** (`src/lib/billing/plans.ts`, product-owner editable):
 
-  | | Basic | Pro |
-  | --- | --- | --- |
-  | Locations | 1 | 25 |
-  | Rules | 3 | 50 |
-  | Advanced rules | no | yes |
-  | Zones | no | yes |
-  | Lookups/month | 1000 | 20000 |
-  | Log history | 14 days | 90 days |
+  | | Basic (free) | Pro | Business |
+  | --- | --- | --- | --- |
+  | Locations | 1 | 3 | 25 |
+  | Rules | 50 | 50 | 50 |
+  | Advanced rules | yes | yes | yes |
+  | Zones | yes | yes | yes |
+  | Lookups/month | 10 | 1,500 | 6,000 |
+  | Log history | 7 days | 30 days | 90 days |
 
-  Without a plan, the dashboard and simulator still work (25 lookups/month), but checkout rates are off.
+  A free install is Basic. Pro and Business map to Wix paid plans through `PLAN_PACKAGE_PRO` / `PLAN_PACKAGE_BUSINESS`.
+  - A lookup is one new destination sent to the routing provider: a geocode plus one matrix call over at most 3 origins. Retries and cache hits don't count.
+  - When the plan can't be confirmed or has expired (`none`), the dashboard and simulator still work (10 lookups/month), but checkout rates, advanced rules and zone editing are off.
 - **Status:** trial (`freeTrialInfo.status = IN_PROGRESS`); cancelling (`autoRenewing = false`), which keeps access until the cycle ends; expired (yearly `expirationDate` passed, no renewal); unknown (no snapshot or one older than 7 days), which never grants checkout.
-- **Downgrade:** rules using Pro features are **skipped**, never repriced. Existing zones keep being enforced, because ignoring an exclusion could deliver to excluded areas. Only the primary location is used.
+- **Downgrade / lost access:** rules using advanced features are **skipped**, never repriced. Existing zones keep being enforced, because ignoring an exclusion could deliver to excluded areas. Only as many locations as the plan allows are used.
 - **Developer override:** the `ENTITLEMENT_OVERRIDE_INSTANCE_IDS` secret, an explicit server-side allowlist of instance IDs.
 
 ## Routing provider choice

@@ -40,8 +40,8 @@ See `.env.example`. Set them with `wix env set`:
 
 | Key | Purpose |
 | --- | --- |
-| `PLAN_PACKAGE_BASIC`, `PLAN_PACKAGE_PRO` | The Wix plan IDs (vendor product IDs) you create in step 5 |
-| `ENTITLEMENT_OVERRIDE_INSTANCE_IDS` | Test sites that get Pro without paying (secret) |
+| `PLAN_PACKAGE_PRO`, `PLAN_PACKAGE_BUSINESS` | The Wix paid plan IDs (vendor product IDs) you create in step 5 |
+| `ENTITLEMENT_OVERRIDE_INSTANCE_IDS` | Test sites that get Business without paying (secret) |
 | `ROLLOUT_MODE`, `ROLLOUT_ALLOWLIST` | Staged rollout / kill switch |
 | `CHECKOUT_BUDGET_MS` | Per-quote time budget (default 4000) |
 
@@ -51,8 +51,9 @@ Add the scopes in `docs/wix-permissions.md` in the App Dashboard → Develop →
 
 ## 5. App Market plans (billing)
 
-1. App Dashboard → **Pricing**: create two paid plans, **Basic** and **Pro**, with optional free trials. Prices are your decision.
-2. Copy each plan's ID into `PLAN_PACKAGE_BASIC` / `PLAN_PACKAGE_PRO` (comma-separate aliases if you have several IDs per tier).
+1. App Dashboard → **Pricing**: offer a free plan, and create two paid plans, **Pro** and **Business**, with optional free trials. Prices are your decision.
+   - **Basic** is the free plan. A free install resolves to Basic, so it has no Wix package.
+2. Copy each paid plan's ID into `PLAN_PACKAGE_PRO` / `PLAN_PACKAGE_BUSINESS` (comma-separate aliases if you have several IDs per tier).
 3. Optional in-app upgrade buttons: configure an **external pricing page** in the App Dashboard. Wix's `billing.getUrl` only issues checkout URLs when one is configured. Without it, the Billing page shows a clear message and merchants upgrade via **Manage Apps → Upgrade**.
 4. To change plan limits, edit `src/lib/billing/plans.ts`.
 
