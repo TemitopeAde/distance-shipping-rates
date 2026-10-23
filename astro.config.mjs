@@ -24,6 +24,8 @@ export default defineConfig({
       ROLLOUT_MODE: envField.enum({ context: "server", access: "public", values: ["all", "allowlist", "off"], default: "all" }),
       ROLLOUT_ALLOWLIST: envField.string({ context: "server", access: "secret", optional: true }),
       CHECKOUT_BUDGET_MS: envField.number({ context: "server", access: "public", default: 4000 }),
+      LIFECYCLE_SHEETS_WEBHOOK_URL: envField.string({ context: "server", access: "secret", optional: true }),
+      LIFECYCLE_SHEETS_WEBHOOK_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
     },
   },
 });

@@ -9,8 +9,11 @@ import {
   ROLLOUT_MODE,
   ROUTING_API_KEY,
   ROUTING_PROVIDER,
+  LIFECYCLE_SHEETS_WEBHOOK_URL,
+  LIFECYCLE_SHEETS_WEBHOOK_SECRET,
 } from 'astro:env/server';
 import { publishServerEnv } from './lib/wix/runtime-env';
+import { publishLifecycleSheetsEnv } from './backend/lifecycle-env-bridge';
 
 /** Makes server env available to separately-bundled backend extensions (see runtime-env.ts). */
 export const onRequest = defineMiddleware((_context, next) => {
@@ -25,5 +28,6 @@ export const onRequest = defineMiddleware((_context, next) => {
     ROLLOUT_ALLOWLIST,
     CHECKOUT_BUDGET_MS,
   });
+  publishLifecycleSheetsEnv({ LIFECYCLE_SHEETS_WEBHOOK_URL, LIFECYCLE_SHEETS_WEBHOOK_SECRET });
   return next();
 });
