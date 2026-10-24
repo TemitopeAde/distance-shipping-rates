@@ -44,6 +44,27 @@ See `.env.example`. Set them with `wix env set`:
 | `ENTITLEMENT_OVERRIDE_INSTANCE_IDS` | Test sites that get Business without paying (secret) |
 | `ROLLOUT_MODE`, `ROLLOUT_ALLOWLIST` | Staged rollout / kill switch |
 | `CHECKOUT_BUDGET_MS` | Per-quote time budget (default 4000) |
+| `LIFECYCLE_SHEETS_WEBHOOK_URL`, `LIFECYCLE_SHEETS_WEBHOOK_SECRET` | Lifecycle event log in Google Sheets (secrets, see below) |
+
+### Lifecycle notifications (Google Sheets + email)
+
+The `billing-*` event handlers report every app lifecycle event in the background, so Wix gets its acknowledgement immediately. A failed delivery is logged and never affects billing sync.
+
+- **Email:** install, purchase (labelled *Free trial started* while a trial is in progress) and plan change send a summary through the shared `pdfstore-mailer` endpoint (`src/backend/notify-lifecycle-event.ts`). No configuration is needed. The recipient must be on that endpoint's `ALLOWED_RECIPIENTS` list.
+- **Google Sheets:** all eight events (install, remove, purchase, change, auto-renewal cancelled, converted to paid, reactivated, transferred) append a row to a tab named after the event type. Rows are de-duplicated by event ID.
+
+To set up Sheets:
+1. Create a Google Sheet. In **Extensions → Apps Script**, paste `scripts/google-sheets-lifecycle.gs`.
+2. **Project Settings → Script properties:** set `SPREADSHEET_ID` (the ID in the sheet URL) and `LIFECYCLE_WEBHOOK_SECRET` (a long random string).
+3. Run `setupLifecycleSheet` once in the editor. This authorizes access and creates the eight tabs.
+4. **Deploy → New deployment → Web app**, execute as *Me*, access *Anyone*. Copy the `/exec` URL.
+5. Store both values in Wix, then release:
+   ```bash
+   npx wix env set --key=LIFECYCLE_SHEETS_WEBHOOK_URL --value=https://script.google.com/macros/s/<id>/exec
+   npx wix env set --key=LIFECYCLE_SHEETS_WEBHOOK_SECRET --value=<same secret>
+   ```
+
+If either value is missing, the Sheets write is skipped and logged as an error, and email still goes out.
 
 ## 4. Permissions
 

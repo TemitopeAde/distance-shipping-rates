@@ -5,10 +5,11 @@ import { wixGateway } from '../../../../lib/data/wix-gateway';
 import { recordLifecycleEvent } from '../../../../backend/record-lifecycle-event';
 import { runInBackground } from '../../../../backend/run-in-background';
 
+// Notifications are scheduled first so a slow billing sync can't delay or skip them.
 export default appInstances.onAppInstanceRemoved(async (event) => {
+  runInBackground('AppRemoved Sheets record', () => recordLifecycleEvent('AppRemoved', event));
   await handleLifecycleEvent('AppRemoved', event.metadata.instanceId, event.data, {
     gateway: wixGateway,
     refreshBilling: (repos, evt) => refreshBilling(repos, evt),
   });
-  runInBackground('AppRemoved Sheets record', () => recordLifecycleEvent('AppRemoved', event));
 });

@@ -11,7 +11,9 @@ export async function getLifecycleSheetsConfig(loadEnvironment: () => Promise<En
   const text = (value: unknown) => typeof value === 'string' ? value.trim() : '';
   const endpoint = text(environment.LIFECYCLE_SHEETS_WEBHOOK_URL);
   const secret = text(environment.LIFECYCLE_SHEETS_WEBHOOK_SECRET);
-  if (!endpoint || !secret) throw new Error('Lifecycle Sheets delivery requires its webhook URL and secret.');
+  if (!endpoint || !secret) {
+    throw new Error('Lifecycle Sheets delivery requires LIFECYCLE_SHEETS_WEBHOOK_URL and LIFECYCLE_SHEETS_WEBHOOK_SECRET.');
+  }
   const url = new URL(endpoint);
   if (url.origin !== 'https://script.google.com' || !/^\/macros\/s\/[^/]+\/exec$/.test(url.pathname)) {
     throw new Error('Lifecycle Sheets webhook must be a deployed Google Apps Script /exec URL.');
@@ -34,7 +36,9 @@ export async function deliverLifecycleSheetRecord(
   if (!response.ok) throw new Error(`Lifecycle Sheets webhook returned HTTP ${response.status}.`);
   const result: unknown = await response.json();
   if (!result || typeof result !== 'object' || !('ok' in result) || result.ok !== true) {
-    throw new Error('Lifecycle Sheets webhook did not acknowledge the event.');
+    throw new Error('Lifecycle Sheets webhook did not acknowledge the event. Check Apps Script executions.');
   }
+  console.log(JSON.stringify({ category: 'lifecycle_sheets', eventType: record.eventType, eventId: record.eventId,
+    status: 'acknowledged', duplicate: 'duplicate' in result ? result.duplicate : null }));
   return result;
 }
