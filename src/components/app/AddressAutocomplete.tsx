@@ -123,6 +123,8 @@ export function AddressAutocomplete({ id, value, onChange, onSelect, country, au
           if (e.target.value.trim().length < MIN_CHARS) {
             setSuggestions([]);
             setOpen(false);
+            // A request still in flight is now stale and won't clear the spinner itself.
+            setSearching(false);
           }
         }}
         onKeyDown={onKeyDown}
