@@ -10,7 +10,7 @@
  *   6. handling fee is reported separately (Wix `additionalCharges`), waived with free delivery if configured
  *   7. round once to the currency's minor unit (half-up)
  */
-import type { PricingRule, Surcharge, Tier } from '../validation/schemas';
+import type { DeliveryZone, PricingRule, Surcharge, Tier } from '../validation/schemas';
 import {
   maxBig,
   microsToMinor,
@@ -273,13 +273,21 @@ export function selectRates(rules: PricingRule[], ctx: RuleContext): SelectionRe
 export type RuleWarning =
   | { kind: 'same_code_same_priority'; ruleIds: [string, string]; code: string }
   | { kind: 'shadowed_rule'; ruleId: string; shadowedBy: string; code: string }
-  | { kind: 'no_active_rules' };
+  | { kind: 'no_active_rules' }
+  | { kind: 'zone_condition_unusable'; ruleId: string; code: string };
 
 /** Static analysis surfaced in the dashboard so merchants can fix ambiguous setups. */
-export function detectRuleConflicts(rules: PricingRule[]): RuleWarning[] {
+export function detectRuleConflicts(rules: PricingRule[], zones: DeliveryZone[]): RuleWarning[] {
   const active = sortRules(rules.filter((r) => r.active && !r.isDemo));
   const warnings: RuleWarning[] = [];
   if (active.length === 0) warnings.push({ kind: 'no_active_rules' });
+  // Only active include zones ever match, so a rule limited to other zones (deleted, inactive, exclusions) never applies.
+  const usableZoneIds = new Set(zones.filter((z) => z.active && z.type === 'include').map((z) => z.id));
+  for (const r of active) {
+    if (r.conditions.zoneIds.length > 0 && !r.conditions.zoneIds.some((id) => usableZoneIds.has(id))) {
+      warnings.push({ kind: 'zone_condition_unusable', ruleId: r.id, code: r.code });
+    }
+  }
   const byCode = new Map<string, PricingRule[]>();
   for (const r of active) byCode.set(r.code, [...(byCode.get(r.code) ?? []), r]);
   for (const [code, group] of byCode) {

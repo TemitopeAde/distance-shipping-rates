@@ -45,6 +45,13 @@ describe('zones', () => {
     expect(evaluateZones([include, exclude], dest)).toEqual({ eligible: false, reason: 'excluded_zone', zoneId: 'no-78704' });
   });
 
+  it('scopes subdivisions to their country', () => {
+    const wa = { country: 'AU', subdivision: 'WA', postalCode: '6000' };
+    expect(evaluateZones([makeZone({ countries: [], subdivisions: ['US-WA'] })], wa).eligible).toBe(false);
+    expect(evaluateZones([makeZone({ countries: [], subdivisions: ['AU-WA'] })], wa).eligible).toBe(true);
+    expect(evaluateZones([makeZone({ countries: ['US'], subdivisions: ['WA'] })], wa).eligible).toBe(false);
+  });
+
   it('ignores inactive zones', () => {
     const exclude = makeZone({ id: 'x', type: 'exclude', countries: ['US'], active: false });
     expect(evaluateZones([exclude], dest).eligible).toBe(true);

@@ -194,6 +194,10 @@ export const zoneInputSchema = z
     if (zone.countries.length === 0 && zone.subdivisions.length === 0 && zone.postalPatterns.length === 0) {
       ctx.addIssue({ code: 'custom', path: ['countries'], message: 'validation.zoneEmpty' });
     }
+    // A bare code like "WA" exists in several countries (US, AU), so it needs a country to scope it.
+    if (zone.countries.length === 0 && zone.subdivisions.some((s) => !/^[A-Z]{2}-/.test(s))) {
+      ctx.addIssue({ code: 'custom', path: ['subdivisions'], message: 'validation.subdivisionNeedsCountry' });
+    }
   });
 export type ZoneInput = z.infer<typeof zoneInputSchema>;
 export interface DeliveryZone extends ZoneInput {

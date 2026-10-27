@@ -47,7 +47,7 @@ const zone = obj({
   type: { type: 'string', enum: ['include', 'exclude'], description: 'include: deliver only here; exclude: never deliver here' },
   active: bool(),
   countries: strList('ISO alpha-2 country codes'),
-  subdivisions: strList('Region codes, e.g. CA-ON or TX'),
+  subdivisions: strList('Region codes: bare (TX) only when countries is set, otherwise with country prefix (US-TX, CA-ON)'),
   postalPatterns: strList('Exact codes, prefixes ending in * (e.g. 787*), or numeric ranges (e.g. 78701-78799)'),
   maxDistance: num('Include zones only: farthest delivery distance in this zone'),
 });

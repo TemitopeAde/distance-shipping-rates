@@ -45,7 +45,6 @@ const toInput = (f: ZoneForm) => ({
   maxDistance: f.type === 'include' ? numOrNull(f.maxDistance) : null,
 });
 
-/** Preset zone distance limits, in the merchant's unit. */
 /** Maps array-item errors (e.g. postalPatterns.2) back to the field. */
 const firstError = (errors: FieldErrors, field: string) => errors[field] ?? Object.entries(errors).find(([k]) => k.startsWith(`${field}.`))?.[1];
 

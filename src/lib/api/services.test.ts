@@ -9,6 +9,7 @@ import { locationInputSchema, pricingRuleInputSchema, zoneInputSchema, type Pric
 import { ApiError } from './errors';
 import {
   computeHealth,
+  deleteZone,
   duplicateRule,
   getOverview,
   listRules,
@@ -146,6 +147,20 @@ describe('zones', () => {
     const zone = zoneInputSchema.parse({ name: 'Z', type: 'include', countries: ['US'] });
     await expect(saveZone(deps(null), zone)).rejects.toMatchObject({ code: 'plan_limit_zones' });
     await expect(saveZone(deps('basic'), zone)).resolves.toMatchObject({ name: 'Z' });
+  });
+
+  it('deleting a zone removes it from rule conditions', async () => {
+    const d = deps();
+    const keep = await saveZone(d, zoneInputSchema.parse({ name: 'Keep', type: 'include', countries: ['US'] }));
+    const gone = await saveZone(d, zoneInputSchema.parse({ name: 'Gone', type: 'include', countries: ['CA'] }));
+    const rule = await saveRule(d, ruleInput({ conditions: { ...ruleInput().conditions, zoneIds: [keep.id, gone.id] } }));
+    await deleteZone(d, gone.id);
+    expect((await d.repos.rules.get(rule.id))?.conditions.zoneIds).toEqual([keep.id]);
+  });
+
+  it('rejects bare subdivisions without a country', () => {
+    expect(zoneInputSchema.safeParse({ name: 'Z', type: 'include', subdivisions: ['WA'] }).success).toBe(false);
+    expect(zoneInputSchema.safeParse({ name: 'Z', type: 'include', subdivisions: ['US-WA'] }).success).toBe(true);
   });
 });
 

@@ -146,11 +146,11 @@ export async function deleteLocation(d: ServiceDeps, id: string): Promise<void> 
 // ---------------------------------------------------------------------------
 
 export async function listRules(d: ServiceDeps) {
-  const [rules, { entitlement }] = await Promise.all([d.repos.rules.list(), entitlementOf(d, { fresh: true })]);
+  const [rules, zones, { entitlement }] = await Promise.all([d.repos.rules.list(), d.repos.zones.list(), entitlementOf(d, { fresh: true })]);
   const sorted = [...rules].sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
   return {
     rules: sorted.map((r) => ({ ...r, exceedsPlan: ruleExceedsPlan(r, entitlement.limits) })),
-    warnings: detectRuleConflicts(rules),
+    warnings: detectRuleConflicts(rules, zones),
     limits: entitlement.limits,
   };
 }
@@ -210,6 +210,11 @@ export async function saveZone(d: ServiceDeps, input: ZoneInput, id?: string): P
 export async function deleteZone(d: ServiceDeps, id: string): Promise<void> {
   // Deleting is always allowed, even after a downgrade.
   if (!(await d.repos.zones.remove(id))) throw new ApiError(404, 'not_found');
+  // Drop the zone from rule conditions, or those rules would silently stop matching.
+  const rules = await d.repos.rules.list();
+  for (const { id: ruleId, ...rule } of rules.filter((r) => r.conditions.zoneIds.includes(id))) {
+    await d.repos.rules.upsert({ ...rule, conditions: { ...rule.conditions, zoneIds: rule.conditions.zoneIds.filter((z) => z !== id) } }, ruleId);
+  }
   await d.repos.settings.bumpVersion();
 }
 
@@ -342,10 +347,11 @@ export function computeHealth(rows: Array<{ status: string; reason: string; prov
 }
 
 export async function getOverview(d: ServiceDeps) {
-  const [settings, locations, rules, { entitlement, billing }, recent, simulations, checkouts] = await Promise.all([
+  const [settings, locations, rules, zones, { entitlement, billing }, recent, simulations, checkouts] = await Promise.all([
     d.repos.settings.get(),
     d.repos.locations.list(),
     d.repos.rules.list(),
+    d.repos.zones.list(),
     entitlementOf(d),
     d.repos.logs.page({ page: 0, pageSize: 50 }),
     d.repos.logs.page({ source: 'simulator', page: 0, pageSize: 1 }),
@@ -383,7 +389,7 @@ export async function getOverview(d: ServiceDeps) {
     entitlement,
     routing: { provider: d.providerId, configured: routingConfigured },
     rollout: { mode: d.rolloutMode, allowed: d.rolloutAllowed },
-    ruleWarnings: detectRuleConflicts(rules),
+    ruleWarnings: detectRuleConflicts(rules, zones),
     counts: { locations: locations.length, rules: rules.length },
   };
 }

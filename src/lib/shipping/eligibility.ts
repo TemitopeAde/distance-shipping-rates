@@ -22,6 +22,12 @@ export function normalizeSubdivision(sub: string): string {
   return dash === 2 ? upper.slice(3) : upper;
 }
 
+/** The country of a full ISO code ("US-NY" → "US"), or null for a bare code ("NY"). */
+export function subdivisionCountry(sub: string): string | null {
+  const upper = sub.trim().toUpperCase();
+  return /^[A-Z]{2}-/.test(upper) ? upper.slice(0, 2) : null;
+}
+
 /**
  * Pattern forms:
  *  - exact: "SW1A1AA"
@@ -47,7 +53,9 @@ function zoneMatches(zone: DeliveryZone, dest: DestinationFacts): boolean {
   if (zone.countries.length > 0 && !zone.countries.includes(country)) return false;
   if (zone.subdivisions.length > 0) {
     const sub = normalizeSubdivision(dest.subdivision);
-    if (!zone.subdivisions.map(normalizeSubdivision).includes(sub)) return false;
+    // "US-WA" only matches in the US; a bare "WA" relies on the zone's countries to scope it.
+    const matches = (s: string) => normalizeSubdivision(s) === sub && (subdivisionCountry(s) ?? country) === country;
+    if (!zone.subdivisions.some(matches)) return false;
   }
   if (zone.postalPatterns.length > 0 && !zone.postalPatterns.some((p) => postalMatches(p, dest.postalCode))) return false;
   return true;

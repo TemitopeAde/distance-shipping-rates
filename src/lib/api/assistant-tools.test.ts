@@ -73,7 +73,7 @@ describe('runAssistantTool', () => {
 
   it('manages zones, locations, settings and go-live', async () => {
     const d = deps();
-    const zone = await runAssistantTool(d, 'create-delivery-zone', { zone: { name: 'Texas', type: 'include', subdivisions: ['TX'] } });
+    const zone = await runAssistantTool(d, 'create-delivery-zone', { zone: { name: 'Texas', type: 'include', countries: ['US'], subdivisions: ['TX'] } });
     const zoneId = (zone.zone as { id: string }).id;
     expect((await runAssistantTool(d, 'update-delivery-zone', { id: zoneId, changes: { maxDistance: 30 } })).zone).toMatchObject({ subdivisions: ['TX'], maxDistance: 30 });
     await runAssistantTool(d, 'delete-delivery-zone', { id: zoneId });

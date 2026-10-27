@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeRule, MILE } from '../../../tests/fixtures';
+import { makeRule, makeZone, MILE } from '../../../tests/fixtures';
 import { parseMicros } from './money';
 import { detectRuleConflicts, priceRule, selectRates, type CartFacts, type RuleContext } from './engine';
 import { metersToBilledMilli } from './units';
@@ -206,13 +206,19 @@ describe('conditions and selection', () => {
   });
 
   it('detects conflicts and shadowed rules', () => {
-    const warnings = detectRuleConflicts([
-      makeRule({ id: 'a', priority: 1 }),
-      makeRule({ id: 'b', priority: 1 }),
-      makeRule({ id: 'c', priority: 2 }),
-    ]);
+    const warnings = detectRuleConflicts(
+      [makeRule({ id: 'a', priority: 1 }), makeRule({ id: 'b', priority: 1 }), makeRule({ id: 'c', priority: 2 })],
+      [],
+    );
     expect(warnings.map((w) => w.kind)).toEqual(['same_code_same_priority', 'shadowed_rule']);
-    expect(detectRuleConflicts([]).map((w) => w.kind)).toEqual(['no_active_rules']);
+    expect(detectRuleConflicts([], []).map((w) => w.kind)).toEqual(['no_active_rules']);
+  });
+
+  it('warns when a rule is limited to zones that can never match', () => {
+    const zoned = (zoneIds: string[]) => makeRule({ id: 'z', code: 'zoned', conditions: { ...makeRule().conditions, zoneIds } });
+    const zones = [makeZone({ id: 'live' }), makeZone({ id: 'off', active: false }), makeZone({ id: 'ex', type: 'exclude' })];
+    expect(detectRuleConflicts([zoned(['live', 'off'])], zones)).toEqual([]);
+    expect(detectRuleConflicts([zoned(['off', 'ex', 'deleted'])], zones)).toEqual([{ kind: 'zone_condition_unusable', ruleId: 'z', code: 'zoned' }]);
   });
 });
 
