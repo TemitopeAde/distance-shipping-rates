@@ -90,6 +90,7 @@ export type NoRateReason =
   | 'no_locations'
   | 'locations_unverified'
   | 'location_country_mismatch'
+  | 'plan_location_limit'
   | 'bad_address'
   | 'low_confidence'
   | 'no_route'
@@ -223,7 +224,9 @@ export async function computeQuote(req: QuoteRequest, deps: QuoteDeps): Promise<
   // Bound provider cost and checkout latency: at most 3 origins per lookup.
   candidates = candidates.slice(0, 3);
   if (candidates.length === 0) {
-    const reason = req.restrictToLocationId && candidateLocations(deps.config.locations, dest).length > 0 ? 'location_country_mismatch' : whyNoLocation(deps.config.locations);
+    const reason = req.restrictToLocationId
+      ? whyRestrictedLocationFails(deps.config.locations, dest, req.restrictToLocationId)
+      : whyNoLocation(deps.config.locations);
     return { kind: 'no_rate', reason, ...NO_TELEMETRY };
   }
 
@@ -265,22 +268,36 @@ export async function computeQuote(req: QuoteRequest, deps: QuoteDeps): Promise<
   const best = reachable[0];
   if (!best) return { kind: 'no_rate', reason: 'beyond_max_distance', ...telemetry };
 
-  const distanceMeters = best.cell.distanceMeters;
   const maxUnits = effectiveMaxDistanceUnits(settings.maxDeliveryDistance, zones, zoneVerdict.matchedIncludeZoneIds);
-  if (!withinDistance(distanceMeters, maxUnits, unit)) {
-    return { kind: 'no_rate', reason: 'beyond_max_distance', distanceMeters, originLocationId: best.location.id, ...telemetry };
+  if (!withinDistance(best.cell.distanceMeters, maxUnits, unit)) {
+    return { kind: 'no_rate', reason: 'beyond_max_distance', distanceMeters: best.cell.distanceMeters, originLocationId: best.location.id, ...telemetry };
   }
 
   const withinRuleLimit = sortRules(deps.config.rules.filter((r) => r.active && !r.isDemo)).slice(0, limits.maxRules);
   const allowedRules = withinRuleLimit.filter((r) => !ruleExceedsPlan(r, limits));
-  const selection = selectRates(allowedRules, {
-    distanceMeters,
-    unit,
-    currency: req.currency,
-    cart,
-    matchedZoneIds: zoneVerdict.matchedIncludeZoneIds,
-    originLocationId: best.location.id,
-  });
+  const select = (origin: typeof best) =>
+    selectRates(allowedRules, {
+      distanceMeters: origin.cell.distanceMeters,
+      unit,
+      currency: req.currency,
+      cart,
+      matchedZoneIds: zoneVerdict.matchedIncludeZoneIds,
+      originLocationId: origin.location.id,
+    });
+
+  // The nearest origin wins. A farther one is used only when no rule applies from any nearer one
+  // (e.g. every rule is limited to that location); diagnostics then still describe the nearest.
+  let chosen = best;
+  let selection = select(best);
+  for (const next of reachable.slice(1)) {
+    if (selection.options.length > 0 || !withinDistance(next.cell.distanceMeters, maxUnits, unit)) break;
+    const alt = select(next);
+    if (alt.options.length > 0) {
+      chosen = next;
+      selection = alt;
+    }
+  }
+  const distanceMeters = chosen.cell.distanceMeters;
 
   const options: QuoteOption[] = selection.options
     .filter((o) => o.priceMinor >= 0n && o.handlingMinor >= 0n)
@@ -311,18 +328,27 @@ export async function computeQuote(req: QuoteRequest, deps: QuoteDeps): Promise<
               ? 'plan_advanced'
               : (rejected.get(r.id) ?? 'code_taken'),
     }));
-    return { kind: 'no_rate', reason: 'no_matching_rule', distanceMeters, originLocationId: best.location.id, ruleDiagnostics, ...telemetry };
+    return { kind: 'no_rate', reason: 'no_matching_rule', distanceMeters, originLocationId: chosen.location.id, ruleDiagnostics, ...telemetry };
   }
 
   return {
     kind: 'rates',
     options,
-    originLocationId: best.location.id,
+    originLocationId: chosen.location.id,
     distanceMeters,
     unit,
     geocodeQuality: resolution.quality,
     ...telemetry,
   };
+}
+
+/** Why the simulator's chosen location can't serve this destination. */
+function whyRestrictedLocationFails(locations: FulfillmentLocation[], dest: NormalizedAddress, id: string): NoRateReason {
+  const only = locations.filter((l) => l.id === id);
+  const basic = whyNoLocation(only);
+  if (basic !== 'location_country_mismatch') return basic;
+  // Active, verified and serving this country: it was cut by the plan's location limit.
+  return candidateLocations(only, dest).length > 0 ? 'plan_location_limit' : 'location_country_mismatch';
 }
 
 function routingFailure(error: RoutingError, deps: QuoteDeps, req: QuoteRequest, t: Telemetry): QuoteOutcome {

@@ -113,6 +113,22 @@ describe('computeQuote — happy path', () => {
     expect(out).toMatchObject({ kind: 'rates', originLocationId: 'b' });
   });
 
+  it('falls back to a farther origin when no rule applies from the nearest', async () => {
+    const onlyFromA = makeRule({ conditions: { ...makeRule().conditions, locationIds: ['a'] } });
+    const out = await computeQuote(
+      request(),
+      deps(
+        { provider: provider([12, 4]) },
+        {
+          settings: settings({ originStrategy: 'nearest' }),
+          locations: [makeLocation({ id: 'a' }), makeLocation({ id: 'b', isPrimary: false })],
+          rules: [onlyFromA],
+        },
+      ),
+    );
+    expect(out).toMatchObject({ kind: 'rates', originLocationId: 'a', distanceMeters: 12 * MILE });
+  });
+
   it('applies discounts-aware free delivery from the request totals', async () => {
     const rule = makeRule({ freeDelivery: { enabled: true, threshold: '45', basis: 'before_discount', waiveHandling: true } });
     const out = await computeQuote(request(), deps({}, { rules: [rule] }));
@@ -205,6 +221,17 @@ describe('computeQuote — never invents charges', () => {
       reason: 'locations_unverified',
     });
     expect(await computeQuote(request(), deps({}, { locations: [makeLocation({ serviceCountries: ['CA'] })] }))).toMatchObject({
+      reason: 'location_country_mismatch',
+    });
+  });
+
+  it('explains why the simulator’s chosen location cannot serve the destination', async () => {
+    const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
+    const sim = (restrictToLocationId: string) => request({ source: 'simulator', restrictToLocationId });
+    const two = [makeLocation({ id: 'a' }), makeLocation({ id: 'b', isPrimary: false })];
+    expect(await computeQuote(sim('b'), deps({ entitlement: basic }, { locations: two }))).toMatchObject({ reason: 'plan_location_limit' });
+    expect(await computeQuote(sim('b'), deps({}, { locations: [two[0], { ...two[1], validatedAt: null }] }))).toMatchObject({ reason: 'locations_unverified' });
+    expect(await computeQuote(sim('b'), deps({}, { locations: [two[0], { ...two[1], serviceCountries: ['CA'] }] }))).toMatchObject({
       reason: 'location_country_mismatch',
     });
   });

@@ -237,6 +237,8 @@ describe('resolveRoutes', () => {
     const results = await Promise.all([resolveRoutes(base(provider)), resolveRoutes(base(provider)), resolveRoutes(base(provider))]);
     expect(results.every((r) => r.ok)).toBe(true);
     expect(provider.geocode).toHaveBeenCalledTimes(1);
+    // Only the caller that made the lookup reports provider calls, so usage is recorded once.
+    expect(results.map((r) => r.providerCalls)).toEqual([2, 0, 0]);
   });
 
   it('rejects low-confidence geocodes and negative-caches them', async () => {

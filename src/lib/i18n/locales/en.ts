@@ -440,6 +440,7 @@ const en = {
     no_locations: 'No active location. Add one under Locations.',
     locations_unverified: 'Your location’s address isn’t verified yet. Open Locations, edit it and save to verify it.',
     location_country_mismatch: 'None of your locations serves this country. Check “Serves countries” under Locations.',
+    plan_location_limit: 'This location is beyond your plan’s location limit, so checkout doesn’t use it.',
     bad_address: 'Address not found',
     low_confidence: 'Address too vague',
     no_route: 'No drivable route',

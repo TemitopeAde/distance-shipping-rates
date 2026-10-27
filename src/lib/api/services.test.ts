@@ -9,6 +9,7 @@ import { locationInputSchema, pricingRuleInputSchema, zoneInputSchema, type Pric
 import { ApiError } from './errors';
 import {
   computeHealth,
+  deleteLocation,
   deleteZone,
   duplicateRule,
   getOverview,
@@ -110,6 +111,33 @@ describe('locations', () => {
     const { location, warning } = await saveLocation(d, locationInput);
     expect(warning).toBe('geocode_low_confidence');
     expect(location.lat).toBeNull();
+  });
+
+  it('keeps verified coordinates when an edit leaves the address unchanged', async () => {
+    const d = deps();
+    const { location } = await saveLocation(d, locationInput);
+    (d.provider!.geocode as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('provider down'));
+    const edited = await saveLocation(d, { ...locationInput, name: 'Renamed', address: { ...locationInput.address, city: ' austin ' } }, location.id);
+    expect(edited.warning).toBeNull();
+    expect(edited.location).toMatchObject({ name: 'Renamed', lat: 30, lng: -97, validatedAt: location.validatedAt });
+    expect(d.provider!.geocode).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-verifies when the address changes', async () => {
+    const d = deps();
+    const { location } = await saveLocation(d, locationInput);
+    await saveLocation(d, { ...locationInput, address: { ...locationInput.address, addressLine1: '2 Main' } }, location.id);
+    expect(d.provider!.geocode).toHaveBeenCalledTimes(2);
+  });
+
+  it('deleting a location promotes a new primary and removes it from rule conditions', async () => {
+    const d = deps();
+    const a = (await saveLocation(d, locationInput)).location;
+    const b = (await saveLocation(d, { ...locationInput, name: 'B' })).location;
+    const rule = await saveRule(d, ruleInput({ conditions: { ...ruleInput().conditions, locationIds: [a.id, b.id] } }));
+    await deleteLocation(d, a.id);
+    expect((await d.repos.locations.get(b.id))?.isPrimary).toBe(true);
+    expect((await d.repos.rules.get(rule.id))?.conditions.locationIds).toEqual([b.id]);
   });
 });
 
