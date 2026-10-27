@@ -9,7 +9,7 @@ import { api } from '../api-client';
 import { CountryMultiSelect } from '../CountrySelect';
 import { EmptyState, ErrorState, Field, LoadingState, PageHeader } from '../common';
 import { useApp } from '../context';
-import { listFromText, number } from '../format';
+import { distanceOptions, listFromText, number } from '../format';
 import { numOrNull, serverFieldErrors, useAction, useResource, validate, type FieldErrors } from '../hooks';
 import type { BillingResponse, DeliveryZone } from '../types';
 
@@ -46,14 +46,6 @@ const toInput = (f: ZoneForm) => ({
 });
 
 /** Preset zone distance limits, in the merchant's unit. */
-const DISTANCE_PRESETS = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200];
-
-/** Presets plus a saved value that isn't one of them, so editing never drops it. */
-const distanceOptions = (current: string) => {
-  const n = Number(current);
-  return current && Number.isFinite(n) && !DISTANCE_PRESETS.includes(n) ? [...DISTANCE_PRESETS, n].sort((a, b) => a - b) : DISTANCE_PRESETS;
-};
-
 /** Maps array-item errors (e.g. postalPatterns.2) back to the field. */
 const firstError = (errors: FieldErrors, field: string) => errors[field] ?? Object.entries(errors).find(([k]) => k.startsWith(`${field}.`))?.[1];
 

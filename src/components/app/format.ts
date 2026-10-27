@@ -50,3 +50,11 @@ export function listFromText(text: string): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 }
+
+const DISTANCE_PRESETS = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200];
+
+/** Presets plus a saved value that isn't one of them, so editing never drops it. */
+export function distanceOptions(current: string): number[] {
+  const n = Number(current);
+  return current && Number.isFinite(n) && !DISTANCE_PRESETS.includes(n) ? [...DISTANCE_PRESETS, n].sort((a, b) => a - b) : DISTANCE_PRESETS;
+}

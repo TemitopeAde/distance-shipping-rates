@@ -8,6 +8,7 @@ import { Alert, AlertDescription, Badge, Card, CardContent, CardDescription, Car
 import { api } from '../api-client';
 import { ErrorState, Field, LoadingState, PageHeader } from '../common';
 import { useApp } from '../context';
+import { distanceOptions, number } from '../format';
 import { numOrNull, serverFieldErrors, useAction, useResource, validate, type FieldErrors } from '../hooks';
 import type { BillingResponse, Overview } from '../types';
 
@@ -128,7 +129,14 @@ function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSet
             </NativeSelect>
           </Field>
           <Field id="st-maxd" label={t('settings.maxDistance', { unit: u })} hint={t('settings.maxDistanceHint')} optional error={errors.maxDeliveryDistance}>
-            <Input inputMode="decimal" value={f.maxDeliveryDistance} onChange={(e) => set('maxDeliveryDistance', e.target.value)} />
+            <NativeSelect value={f.maxDeliveryDistance} onChange={(e) => set('maxDeliveryDistance', e.target.value)}>
+              <option value="">{t('zones.noDistanceLimit')}</option>
+              {distanceOptions(f.maxDeliveryDistance).map((d) => (
+                <option key={d} value={String(d)}>
+                  {number(d, locale, 1)} {u}
+                </option>
+              ))}
+            </NativeSelect>
           </Field>
         </CardContent>
       </Card>
