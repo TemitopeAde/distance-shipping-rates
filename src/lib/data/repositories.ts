@@ -90,7 +90,7 @@ export function createRepositories(gw: DataGateway, rawInstanceId: string) {
   };
 
   // -------------------------------------------------------------------------
-  function entityRepo<T extends { id: string; name: string }>(collection: string, indexFields: (e: Omit<T, 'id'>) => Record<string, unknown>) {
+  function entityRepo<T extends { id: string }>(collection: string, indexFields: (e: Omit<T, 'id'>) => Record<string, unknown>) {
     return {
       list: () => listPayloads<T>(collection),
       async get(id: string): Promise<T | null> {
@@ -292,7 +292,7 @@ export interface CalculationLogDetails {
     /** Pricing steps; amounts are micro-unit strings. */
     breakdown: Record<string, unknown>[];
   }[];
-  ruleDiagnostics: { ruleId: string; name: string; reason: string }[];
+  ruleDiagnostics: { ruleId: string; title: string; reason: string }[];
 }
 
 function toLogEntry(d: Doc): CalculationLogEntry & { id: string } {

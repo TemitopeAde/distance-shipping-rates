@@ -85,7 +85,7 @@ async function seed(settingsOverrides: Record<string, unknown> = {}) {
   await repos.settings.save({ ...(await repos.settings.get()), pluginEnabled: true, ...settingsOverrides });
   const { id: _l, ...loc } = makeLocation();
   await repos.locations.upsert(loc);
-  const { id: _r, ...rule } = makeRule({ deliveryTime: 'Same day', handlingFee: '1.5' });
+  const { id: _r, ...rule } = makeRule({ handlingFee: '1.5' });
   await repos.rules.upsert(rule);
 }
 
@@ -118,7 +118,6 @@ describe('getShippingRates handler', () => {
         {
           code: 'local',
           title: 'Local delivery',
-          logistics: { deliveryTime: 'Same day' },
           cost: { price: '25.00', currency: 'USD', additionalCharges: [{ type: 'HANDLING_FEE', price: '1.50', details: 'Handling fee' }] },
         },
       ],
