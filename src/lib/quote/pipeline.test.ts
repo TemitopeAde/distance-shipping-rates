@@ -184,13 +184,13 @@ describe('computeQuote — never invents charges', () => {
     const basic = resolveEntitlement('inst', { ...proSnapshot, isFree: true }, entitlementCfg);
     const noAdvanced = { ...basic, limits: { ...basic.limits, advancedRules: false } };
     const rules = [
-      makeRule({ id: 'a', name: 'Sample', isDemo: true, active: false, priority: 1 }),
-      makeRule({ id: 'b', name: 'Off', active: false, priority: 2 }),
-      makeRule({ id: 'c', name: 'Short range', maxDistance: 5, priority: 3 }),
-      makeRule({ id: 'd', name: 'Tiered', priority: 4, mode: 'graduated_tiers', tiers: [{ upTo: null, ratePerUnit: '1', flatFee: '0' }] }),
+      makeRule({ id: 'a', title: 'Sample', isDemo: true, active: false, priority: 1 }),
+      makeRule({ id: 'b', title: 'Off', active: false, priority: 2 }),
+      makeRule({ id: 'c', title: 'Short range', maxDistance: 5, priority: 3 }),
+      makeRule({ id: 'd', title: 'Tiered', priority: 4, mode: 'graduated_tiers', tiers: [{ upTo: null, ratePerUnit: '1', flatFee: '0' }] }),
     ];
     const out = await computeQuote(request(), deps({ entitlement: noAdvanced }, { rules }));
-    expect(out.kind === 'no_rate' && out.ruleDiagnostics?.map((d) => [d.name, d.reason])).toEqual([
+    expect(out.kind === 'no_rate' && out.ruleDiagnostics?.map((d) => [d.title, d.reason])).toEqual([
       ['Sample', 'demo'],
       ['Off', 'inactive'],
       ['Short range', 'exceeds_rule_max_distance'],

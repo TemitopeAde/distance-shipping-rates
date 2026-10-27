@@ -73,7 +73,6 @@ export interface SerializedOption {
   priceMinor: string;
   handlingMinor: string;
   currency: string;
-  deliveryTime: string;
   freeDelivery: boolean;
   billedUnits: number | null;
   breakdown: Array<Record<string, unknown> & { kind: string }>;
@@ -81,6 +80,6 @@ export interface SerializedOption {
 
 export type SerializedOutcome =
   | { kind: 'rates'; options: SerializedOption[]; originLocationId: string; distanceMeters: number; unit: 'mi' | 'km'; geocodeQuality: string; providerCalls: number; cacheHit: boolean; routingErrorKind: string | null }
-  | { kind: 'no_rate'; reason: string; distanceMeters?: number; originLocationId?: string; ruleDiagnostics?: Array<{ ruleId: string; name: string; reason: string }>; providerCalls: number; cacheHit: boolean; routingErrorKind: string | null }
+  | { kind: 'no_rate'; reason: string; distanceMeters?: number; originLocationId?: string; ruleDiagnostics?: Array<{ ruleId: string; title: string; reason: string }>; providerCalls: number; cacheHit: boolean; routingErrorKind: string | null }
   | { kind: 'fallback'; option: SerializedOption; reason: string; providerCalls: number; cacheHit: boolean; routingErrorKind: string | null }
   | { kind: 'address_error'; error: string; fields: string[]; providerCalls: number; cacheHit: boolean; routingErrorKind: string | null };

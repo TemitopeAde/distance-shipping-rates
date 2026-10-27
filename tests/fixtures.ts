@@ -11,7 +11,6 @@ import {
 export function makeRule(overrides: Partial<PricingRuleInput> & { id?: string } = {}): PricingRule {
   const { id = 'rule-1', ...rest } = overrides;
   const parsed = pricingRuleInputSchema.parse({
-    name: 'Standard',
     title: 'Local delivery',
     code: 'local',
     active: true,

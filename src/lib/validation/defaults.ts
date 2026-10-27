@@ -14,10 +14,8 @@ export function defaultSettings(): MerchantSettings {
  */
 export function demoRuleInput(): PricingRuleInput {
   return pricingRuleInputSchema.parse({
-    name: 'Sample: local delivery (review before use)',
     title: 'Local delivery',
     code: 'local-delivery',
-    deliveryTime: '',
     active: false,
     isDemo: true,
     priority: 100,

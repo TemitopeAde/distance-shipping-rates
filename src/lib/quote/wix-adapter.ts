@@ -76,10 +76,6 @@ function toWixOption(o: QuoteOption): WixOption {
   return {
     code: o.code,
     title: o.title,
-    logistics: {
-      ...(o.deliveryTime ? { deliveryTime: o.deliveryTime } : {}),
-      ...(o.instructions ? { instructions: o.instructions } : {}),
-    },
     cost: {
       price: minorToDecimalString(o.priceMinor, o.currency),
       currency: o.currency,

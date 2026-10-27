@@ -118,7 +118,7 @@ export function createRepositories(gw: DataGateway, rawInstanceId: string) {
   }
 
   const locations = entityRepo<FulfillmentLocation>(COLLECTIONS.locations, (l) => ({ name: l.name, isPrimary: l.isPrimary, active: l.active }));
-  const rules = entityRepo<PricingRule>(COLLECTIONS.rules, (r) => ({ name: r.name, code: r.code, priority: r.priority, active: r.active }));
+  const rules = entityRepo<PricingRule>(COLLECTIONS.rules, (r) => ({ title: r.title, code: r.code, priority: r.priority, active: r.active }));
   const zones = entityRepo<DeliveryZone>(COLLECTIONS.zones, (z) => ({ name: z.name, zoneType: z.type, active: z.active }));
 
   // -------------------------------------------------------------------------

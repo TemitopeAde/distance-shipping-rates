@@ -74,8 +74,6 @@ export interface QuoteOption {
   priceMinor: bigint;
   handlingMinor: bigint;
   currency: string;
-  deliveryTime: string;
-  instructions: string;
   freeDelivery: boolean;
   billedUnits: number | null;
   breakdown: BreakdownLine[];
@@ -105,7 +103,7 @@ export type NoRateReason =
 /** Why a rule did not produce an option (shown in the simulator when no rule applies). */
 export interface RuleDiagnostic {
   ruleId: string;
-  name: string;
+  title: string;
   reason: 'inactive' | 'demo' | 'plan_rule_limit' | 'plan_advanced' | 'code_taken' | RuleRejection;
 }
 
@@ -163,8 +161,6 @@ function fallbackOption(settings: MerchantSettings, currency: string): QuoteOpti
     priceMinor,
     handlingMinor: 0n,
     currency,
-    deliveryTime: '',
-    instructions: '',
     freeDelivery: false,
     billedUnits: null,
     breakdown: [],
@@ -288,28 +284,23 @@ export async function computeQuote(req: QuoteRequest, deps: QuoteDeps): Promise<
 
   const options: QuoteOption[] = selection.options
     .filter((o) => o.priceMinor >= 0n && o.handlingMinor >= 0n)
-    .map((o) => {
-      const rule = allowedRules.find((r) => r.id === o.ruleId) as PricingRule;
-      return {
-        code: o.code,
-        title: o.title,
-        ruleId: o.ruleId,
-        priceMinor: o.priceMinor,
-        handlingMinor: o.handlingMinor,
-        currency: req.currency,
-        deliveryTime: rule.deliveryTime,
-        instructions: rule.instructions,
-        freeDelivery: o.freeDelivery,
-        billedUnits: o.billedUnits,
-        breakdown: o.breakdown,
-      };
-    });
+    .map((o) => ({
+      code: o.code,
+      title: o.title,
+      ruleId: o.ruleId,
+      priceMinor: o.priceMinor,
+      handlingMinor: o.handlingMinor,
+      currency: req.currency,
+      freeDelivery: o.freeDelivery,
+      billedUnits: o.billedUnits,
+      breakdown: o.breakdown,
+    }));
 
   if (options.length === 0) {
     const rejected = new Map(selection.rejected.map((r) => [r.ruleId, r.reason]));
     const ruleDiagnostics: RuleDiagnostic[] = sortRules(deps.config.rules).map((r) => ({
       ruleId: r.id,
-      name: r.name,
+      title: r.title,
       reason: r.isDemo
         ? 'demo'
         : !r.active

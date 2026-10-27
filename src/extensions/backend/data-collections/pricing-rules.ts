@@ -7,14 +7,14 @@ export default {
   displayName: 'Pricing Rules',
   fields: [
     { key: 'instanceId', type: 'TEXT', displayName: 'Instance ID' },
-    { key: 'name', type: 'TEXT', displayName: 'Name' },
+    { key: 'title', type: 'TEXT', displayName: 'Title' },
     { key: 'code', type: 'TEXT', displayName: 'Option code' },
     { key: 'priority', type: 'NUMBER', displayName: 'Priority' },
     { key: 'active', type: 'BOOLEAN', displayName: 'Active' },
     { key: 'payload', type: 'OBJECT', displayName: 'Rule', objectOptions: { fields: [] } },
     { key: 'schemaVersion', type: 'NUMBER', displayName: 'Schema version' },
   ],
-  displayField: 'name',
+  displayField: 'title',
   // App-private data: only reachable through the app's elevated backend code.
   dataPermissions: { itemRead: 'PRIVILEGED', itemInsert: 'PRIVILEGED', itemUpdate: 'PRIVILEGED', itemRemove: 'PRIVILEGED' },
   indexes: [

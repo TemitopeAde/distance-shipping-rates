@@ -27,7 +27,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  Textarea,
 } from '../../ui/primitives';
 import { api } from '../api-client';
 import { EmptyState, ErrorState, Field, LoadingState, PageHeader } from '../common';
@@ -39,11 +38,8 @@ import type { DeliveryZone, FulfillmentLocation, PlanLimits, PricingRule, RulesR
 type Surcharge = { kind: 'weight_over'; thresholdKg: string; amount: string } | { kind: 'order_value_over'; threshold: string; amount: string };
 
 interface RuleForm {
-  name: string;
   title: string;
   code: string;
-  deliveryTime: string;
-  instructions: string;
   active: boolean;
   isDemo: boolean;
   priority: number;
@@ -71,11 +67,8 @@ interface RuleForm {
 }
 
 const blank = (priority: number): RuleForm => ({
-  name: '',
   title: '',
   code: 'local-delivery',
-  deliveryTime: '',
-  instructions: '',
   active: false,
   isDemo: false,
   priority,
@@ -104,11 +97,8 @@ const blank = (priority: number): RuleForm => ({
 
 function toForm(r: PricingRule): RuleForm {
   return {
-    name: r.name,
     title: r.title,
     code: r.code,
-    deliveryTime: r.deliveryTime,
-    instructions: r.instructions,
     active: r.active,
     isDemo: r.isDemo,
     priority: r.priority,
@@ -142,11 +132,8 @@ const optDec = (s: string) => (s.trim() === '' ? null : s.trim());
 
 export function toRuleInput(f: RuleForm): unknown {
   return {
-    name: f.name,
     title: f.title,
     code: f.code,
-    deliveryTime: f.deliveryTime,
-    instructions: f.instructions,
     active: f.active,
     isDemo: f.isDemo,
     priority: f.priority,
@@ -249,22 +236,11 @@ function RuleEditor({
           </TabsList>
 
           <TabsContent value="basics" className="grid gap-4">
-            <Field id="r-name" label={t('rules.fields.name')} error={errors.name}>
-              <Input value={f.name} onChange={(e) => set('name', e.target.value)} />
-            </Field>
             <Field id="r-title" label={t('rules.fields.title')} hint={t('rules.fields.titleHint')} error={errors.title}>
               <Input value={f.title} onChange={(e) => set('title', e.target.value)} />
             </Field>
-            <div className="grid gap-4">
-              <Field id="r-code" label={t('rules.fields.code')} hint={t('rules.fields.codeHint')} error={errors.code}>
-                <Input value={f.code} onChange={(e) => set('code', e.target.value.toLowerCase())} dir="ltr" />
-              </Field>
-              <Field id="r-time" label={t('rules.fields.deliveryTime')} hint={t('rules.fields.deliveryTimeHint')} optional error={errors.deliveryTime}>
-                <Input value={f.deliveryTime} onChange={(e) => set('deliveryTime', e.target.value)} />
-              </Field>
-            </div>
-            <Field id="r-instr" label={t('rules.fields.instructions')} optional error={errors.instructions}>
-              <Textarea value={f.instructions} onChange={(e) => set('instructions', e.target.value)} />
+            <Field id="r-code" label={t('rules.fields.code')} hint={t('rules.fields.codeHint')} error={errors.code}>
+              <Input value={f.code} onChange={(e) => set('code', e.target.value.toLowerCase())} dir="ltr" />
             </Field>
             <Label className="font-normal">
               <Switch checked={f.active} onCheckedChange={(v) => set('active', v)} />
@@ -550,7 +526,6 @@ export function RulesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('rules.columns.order')}</TableHead>
-                  <TableHead>{t('rules.columns.name')}</TableHead>
                   <TableHead>{t('rules.columns.option')}</TableHead>
                   <TableHead>{t('rules.columns.pricing')}</TableHead>
                   <TableHead>{t('rules.columns.status')}</TableHead>
@@ -573,7 +548,10 @@ export function RulesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="whitespace-normal">
-                      <div className="font-medium">{r.name}</div>
+                      <div className="font-medium">{r.title}</div>
+                      <div className="text-muted-foreground font-mono text-xs" dir="ltr">
+                        {r.code}
+                      </div>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {r.isDemo && <Badge variant="warning">{t('common.demo')}</Badge>}
                         {r.exceedsPlan && (
@@ -583,31 +561,25 @@ export function RulesPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-normal">
-                      <div>{r.title}</div>
-                      <div className="text-muted-foreground font-mono text-xs" dir="ltr">
-                        {r.code}
-                      </div>
-                    </TableCell>
                     <TableCell>{summary(r)}</TableCell>
                     <TableCell>
-                      <Switch checked={r.active} disabled={action.busy} onCheckedChange={(v) => toggle(r, v)} aria-label={`${t('rules.fields.active')}: ${r.name}`} />
+                      <Switch checked={r.active} disabled={action.busy} onCheckedChange={(v) => toggle(r, v)} aria-label={`${t('rules.fields.active')}: ${r.title}`} />
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-0.5">
-                        <Button variant="ghost" size="icon" aria-label={`${t('common.edit')} ${r.name}`} onClick={() => setEditing({ id: r.id, form: toForm(r) })}>
+                        <Button variant="ghost" size="icon" aria-label={`${t('common.edit')} ${r.title}`} onClick={() => setEditing({ id: r.id, form: toForm(r) })}>
                           <Pencil />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={`${t('common.duplicate')} ${r.name}`}
+                          aria-label={`${t('common.duplicate')} ${r.title}`}
                           disabled={action.busy}
                           onClick={() => void action.run(() => api(`rules/${r.id}/duplicate`, { method: 'POST' }), { success: t('common.saved') }).then(() => reload())}
                         >
                           <Copy />
                         </Button>
-                        <Button variant="ghost" size="icon" aria-label={`${t('common.delete')} ${r.name}`} onClick={() => setDeleting(r)}>
+                        <Button variant="ghost" size="icon" aria-label={`${t('common.delete')} ${r.title}`} onClick={() => setDeleting(r)}>
                           <Trash2 />
                         </Button>
                       </div>
@@ -641,7 +613,7 @@ export function RulesPage() {
       <ConfirmDialog
         open={deleting !== null}
         onOpenChange={(o) => !o && setDeleting(null)}
-        title={t('common.confirmDeleteTitle', { name: deleting?.name ?? '' })}
+        title={t('common.confirmDeleteTitle', { name: deleting?.title ?? '' })}
         description={t('common.confirmDeleteBody')}
         confirmLabel={t('common.delete')}
         cancelLabel={t('common.cancel')}

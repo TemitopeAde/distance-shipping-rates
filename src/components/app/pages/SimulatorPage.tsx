@@ -82,7 +82,6 @@ function OptionCard({ option, unit }: { option: SerializedOption; unit: 'mi' | '
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-medium">{option.title}</p>
-          {option.deliveryTime && <p className="text-muted-foreground text-sm">{option.deliveryTime}</p>}
           <p className="text-muted-foreground font-mono text-xs" dir="ltr">
             {option.code}
           </p>
@@ -321,7 +320,7 @@ export function SimulatorPage() {
                         <ul className="list-disc ps-4">
                           {outcome.ruleDiagnostics.map((d) => (
                             <li key={d.ruleId}>
-                              <span className="font-medium">{d.name}</span>: {t(`simulator.ruleReasons.${d.reason}`, { defaultValue: d.reason })}
+                              <span className="font-medium">{d.title}</span>: {t(`simulator.ruleReasons.${d.reason}`, { defaultValue: d.reason })}
                             </li>
                           ))}
                         </ul>

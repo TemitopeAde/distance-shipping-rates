@@ -297,7 +297,7 @@ export async function runAssistantTool(d: ServiceDeps, methodName: string, paylo
   }
 }
 
-type SerializedOption = { title: string; code: string; priceMinor: string; handlingMinor: string; currency: string; deliveryTime: string; freeDelivery: boolean };
+type SerializedOption = { title: string; code: string; priceMinor: string; handlingMinor: string; currency: string; freeDelivery: boolean };
 
 /** Turns the simulator outcome (minor units as strings) into prices Aria can read out. */
 function summarizeOutcome(outcome: Record<string, unknown>): Record<string, unknown> {
@@ -305,7 +305,6 @@ function summarizeOutcome(outcome: Record<string, unknown>): Record<string, unkn
     title: o.title,
     code: o.code,
     price: `${minorToDecimalString(BigInt(o.priceMinor) + BigInt(o.handlingMinor), o.currency)} ${o.currency}`,
-    deliveryTime: o.deliveryTime || null,
     freeDelivery: o.freeDelivery,
   });
   const km = (m: unknown) => (typeof m === 'number' ? Math.round(m / 100) / 10 : null);

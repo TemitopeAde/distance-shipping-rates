@@ -24,11 +24,8 @@ const address = obj(
 );
 
 const rule = obj({
-  name: str('Internal rule name'),
   title: str('Delivery option name shown to shoppers at checkout'),
   code: str('Option code: lowercase letters, digits, - or _. Rules sharing a code compete by priority'),
-  deliveryTime: str('Estimated delivery time shown to shoppers, e.g. "Same day"'),
-  instructions: str(),
   active: bool('Whether checkout uses this rule. Defaults to false'),
   priority: num('Lower runs first'),
   mode: { type: 'string', enum: ['per_unit', 'graduated_tiers', 'volume_tiers'], description: 'per_unit: base fee + rate per mile/km. Tier modes use `tiers`' },

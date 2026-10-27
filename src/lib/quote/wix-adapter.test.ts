@@ -39,8 +39,6 @@ const option = (o: Partial<QuoteOption> = {}): QuoteOption => ({
   priceMinor: 2500n,
   handlingMinor: 0n,
   currency: 'USD',
-  deliveryTime: 'Same day',
-  instructions: '',
   freeDelivery: false,
   billedUnits: 10,
   breakdown: [],
@@ -91,7 +89,6 @@ describe('toWixMapping', () => {
           {
             code: 'local',
             title: 'Local delivery',
-            logistics: { deliveryTime: 'Same day' },
             cost: { price: '25.00', currency: 'USD', additionalCharges: [{ type: 'HANDLING_FEE', price: '1.50', details: 'Handling fee' }] },
           },
         ],

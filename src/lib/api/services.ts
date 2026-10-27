@@ -177,7 +177,7 @@ export async function duplicateRule(d: ServiceDeps, id: string): Promise<Pricing
   const source = await d.repos.rules.get(id);
   if (!source) throw new ApiError(404, 'not_found');
   const { id: _omit, ...rest } = source;
-  return saveRule(d, { ...rest, name: `${rest.name} (copy)`.slice(0, 80), active: false, isDemo: false, priority: rest.priority + 1 });
+  return saveRule(d, { ...rest, active: false, isDemo: false, priority: rest.priority + 1 });
 }
 
 export async function reorderRules(d: ServiceDeps, ids: string[]): Promise<void> {

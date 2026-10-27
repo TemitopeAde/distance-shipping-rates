@@ -93,7 +93,6 @@ export const pricingModeSchema = z.enum(['per_unit', 'graduated_tiers', 'volume_
 
 export const pricingRuleInputSchema = z
   .object({
-    name: shortText(80),
     /** Shipping method title shown to shoppers. */
     title: shortText(100),
     /** Stable option code; rules sharing a code compete by priority. */
@@ -101,8 +100,6 @@ export const pricingRuleInputSchema = z
       .string()
       .trim()
       .regex(/^[a-z0-9][a-z0-9_-]{0,39}$/, { message: 'validation.code' }),
-    deliveryTime: optionalText(100),
-    instructions: optionalText(200),
     active: z.boolean().default(false),
     isDemo: z.boolean().default(false),
     priority: z.number().int().min(0).max(10000).default(100),

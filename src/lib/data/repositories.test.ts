@@ -19,9 +19,9 @@ describe('tenant isolation', () => {
     const a = createRepositories(gw, 'instance-a');
     const b = createRepositories(gw, 'instance-b');
     const ruleA = await a.rules.upsert(strip(makeRule()));
-    await b.rules.upsert(strip(makeRule({ name: 'B rule' })));
+    await b.rules.upsert(strip(makeRule({ title: 'B rule' })));
 
-    expect((await a.rules.list()).map((r) => r.name)).toEqual(['Standard']);
+    expect((await a.rules.list()).map((r) => r.title)).toEqual(['Local delivery']);
     expect(await b.rules.get(ruleA.id)).toBeNull();
   });
 

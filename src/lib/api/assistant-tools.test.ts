@@ -60,7 +60,7 @@ describe('runAssistantTool', () => {
 
   it('creates, partially updates, duplicates, reorders and deletes rules', async () => {
     const d = deps();
-    const created = await runAssistantTool(d, 'create-pricing-rule', { rule: { name: 'Local', title: 'Local delivery', code: 'local', baseFee: '5', ratePerUnit: '1.5', active: true } });
+    const created = await runAssistantTool(d, 'create-pricing-rule', { rule: { title: 'Local delivery', code: 'local', baseFee: '5', ratePerUnit: '1.5', active: true } });
     const id = (created.rule as { id: string }).id;
     const updated = await runAssistantTool(d, 'update-pricing-rule', { id, changes: { baseFee: '6', freeDelivery: { enabled: true, threshold: '100' } } });
     expect(updated.rule).toMatchObject({ baseFee: '6', ratePerUnit: '1.5', freeDelivery: { enabled: true, threshold: '100', basis: 'after_discount' } });
@@ -89,7 +89,7 @@ describe('runAssistantTool', () => {
     expect(settings.settings).toMatchObject({ unit: 'km', routing: { avoidTolls: true, avoidHighways: false }, pluginEnabled: false });
 
     await expect(runAssistantTool(d, 'run-delivery-setup-action', { action: 'go_live' })).rejects.toMatchObject({ code: 'golive_no_rule' });
-    await runAssistantTool(d, 'create-pricing-rule', { rule: { name: 'R', title: 'Delivery', code: 'local', baseFee: '5', active: true } });
+    await runAssistantTool(d, 'create-pricing-rule', { rule: { title: 'Delivery', code: 'local', baseFee: '5', active: true } });
     expect(await runAssistantTool(d, 'run-delivery-setup-action', { action: 'go_live' })).toMatchObject({ ok: true, live: true });
     await expect(runAssistantTool(d, 'run-delivery-setup-action', { action: 'seed' })).rejects.toMatchObject({ code: 'invalid_input' });
   });

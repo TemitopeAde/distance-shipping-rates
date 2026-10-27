@@ -63,7 +63,7 @@ function deps(plan: 'basic' | 'pro' | 'business' | null = 'pro', gw = new Memory
 }
 
 const ruleInput = (o: Partial<PricingRuleInput> = {}) =>
-  pricingRuleInputSchema.parse({ name: 'R', title: 'Delivery', code: 'local', active: true, baseFee: '5', ratePerUnit: '2', ...o });
+  pricingRuleInputSchema.parse({ title: 'Delivery', code: 'local', active: true, baseFee: '5', ratePerUnit: '2', ...o });
 
 const locationInput = locationInputSchema.parse({
   name: 'Store',
@@ -114,7 +114,7 @@ describe('locations', () => {
 
 describe('rules', () => {
   it('allows advanced rules on Basic but not without a confirmed plan', async () => {
-    await expect(saveRule(deps('basic'), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).resolves.toMatchObject({ name: 'R' });
+    await expect(saveRule(deps('basic'), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).resolves.toMatchObject({ title: 'Delivery' });
     await expect(saveRule(deps(null), ruleInput({ surcharges: [{ kind: 'weight_over', thresholdKg: 1, amount: '1' }] }))).rejects.toBeInstanceOf(ApiError);
   });
 
@@ -127,7 +127,7 @@ describe('rules', () => {
     const d = deps();
     const r = await saveRule(d, ruleInput());
     const copy = await duplicateRule(d, r.id);
-    expect(copy).toMatchObject({ active: false, name: 'R (copy)' });
+    expect(copy).toMatchObject({ active: false, title: 'Delivery' });
   });
 
   it('reorders priorities and rejects mismatched lists', async () => {
