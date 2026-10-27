@@ -185,6 +185,8 @@ function RuleEditor({
   const { busy, run } = useAction();
   const set = <K extends keyof RuleForm>(k: K, v: RuleForm[K]) => setF((p) => ({ ...p, [k]: v }));
   const pro = limits.advancedRules;
+  // Service areas, plus any zone the rule already uses (e.g. now an exclusion) so it can be unticked.
+  const zoneChoices = zones.filter((z) => z.type === 'include' || initial.zoneIds.includes(z.id));
 
   const tabOf = (path: string) => {
     if (/^(tiers|ratePerUnit|baseFee|includedDistance|minFee|maxFee|maxDistance|distanceRounding|mode)/.test(path)) return 'pricing';
@@ -402,10 +404,10 @@ function RuleEditor({
                 <Input inputMode="decimal" disabled={!pro} value={f.maxWeightKg} onChange={(e) => set('maxWeightKg', e.target.value)} />
               </Field>
             </div>
-            {zones.length > 0 && (
+            {zoneChoices.length > 0 && (
               <fieldset className="grid gap-2">
                 <legend className="mb-1 text-sm font-medium">{t('rules.fields.zones')}</legend>
-                {zones.filter((z) => z.type === 'include').map((z) => (
+                {zoneChoices.map((z) => (
                   <Label key={z.id} className="font-normal">
                     <Checkbox
                       disabled={!pro}
@@ -417,7 +419,7 @@ function RuleEditor({
                 ))}
               </fieldset>
             )}
-            {locations.length > 1 && (
+            {(locations.length > 1 || f.locationIds.length > 0) && (
               <fieldset className="grid gap-2">
                 <legend className="mb-1 text-sm font-medium">{t('rules.fields.locations')}</legend>
                 {locations.map((l) => (

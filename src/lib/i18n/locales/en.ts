@@ -274,6 +274,7 @@ const en = {
       shadowed_rule: 'A rule for “{{code}}” will never be used because a rule above it always applies.',
       no_active_rules: 'No active rules: customers won’t see a distance-based option.',
       zone_condition_unusable: 'The rule for “{{code}}” will never be used: none of its zones is an active service area.',
+      location_condition_unusable: 'The rule for “{{code}}” will never be used: none of its locations is active.',
     },
   },
   zones: {

@@ -9,7 +9,7 @@ import { PLAN_LIMITS, type PaidPlanId } from '../billing/plans';
 import { usageThisMonth } from '../billing/usage';
 import type { BillingRow, Repositories } from '../data/repositories';
 import { detectRuleConflicts } from '../shipping/engine';
-import { normalizeAddress } from '../routing/address';
+import { canonicalAddressKey, normalizeAddress } from '../routing/address';
 import { RoutingError } from '../routing/errors';
 import { withRetry } from '../routing/resilience';
 import type { RoutingProvider } from '../routing/types';
@@ -113,18 +113,30 @@ export async function saveLocation(d: ServiceDeps, input: LocationInput, id?: st
   if (!id && existing.length >= entitlement.limits.maxLocations) {
     throw new ApiError(403, 'plan_limit_locations', 'plan_limit_locations', { limit: entitlement.limits.maxLocations });
   }
-  if (id && !existing.some((l) => l.id === id)) throw new ApiError(404, 'not_found');
+  const current = id ? existing.find((l) => l.id === id) : undefined;
+  if (id && !current) throw new ApiError(404, 'not_found');
 
-  const { warning, geo } = await geocodeLocation(d, input);
-  const location: Omit<FulfillmentLocation, 'id'> = {
-    ...input,
-    isPrimary: input.isPrimary || existing.filter((l) => l.id !== id).length === 0,
-    lat: geo && warning === null ? geo.location.lat : null,
-    lng: geo && warning === null ? geo.location.lng : null,
-    geocodeQuality: geo ? geo.quality : null,
-    formattedAddress: geo?.formatted ?? '',
-    validatedAt: geo && warning === null ? nowOf(d).toISOString() : null,
-  };
+  const isPrimary = input.isPrimary || existing.filter((l) => l.id !== id).length === 0;
+  let location: Omit<FulfillmentLocation, 'id'>;
+  let warning: LocationSaveResult['warning'] = null;
+  if (current && current.validatedAt && current.lat !== null && current.lng !== null && sameAddress(current.address, input.address)) {
+    // Address unchanged: keep the verified coordinates. A provider hiccup must not unverify a working location.
+    const { id: _omit, ...kept } = current;
+    location = { ...kept, ...input, isPrimary };
+  } else {
+    const result = await geocodeLocation(d, input);
+    const geo = result.geo;
+    warning = result.warning;
+    location = {
+      ...input,
+      isPrimary,
+      lat: geo && warning === null ? geo.location.lat : null,
+      lng: geo && warning === null ? geo.location.lng : null,
+      geocodeQuality: geo ? geo.quality : null,
+      formattedAddress: geo?.formatted ?? '',
+      validatedAt: geo && warning === null ? nowOf(d).toISOString() : null,
+    };
+  }
   const saved = await d.repos.locations.upsert(location, id);
   if (saved.isPrimary) {
     for (const other of existing.filter((l) => l.id !== saved.id && l.isPrimary)) {
@@ -136,8 +148,26 @@ export async function saveLocation(d: ServiceDeps, input: LocationInput, id?: st
   return { location: saved, warning };
 }
 
+function sameAddress(a: LocationInput['address'], b: LocationInput['address']): boolean {
+  return canonicalAddressKey(normalizeAddress(a)) === canonicalAddressKey(normalizeAddress(b));
+}
+
 export async function deleteLocation(d: ServiceDeps, id: string): Promise<void> {
-  if (!(await d.repos.locations.remove(id))) throw new ApiError(404, 'not_found');
+  const deleted = await d.repos.locations.get(id);
+  if (!deleted || !(await d.repos.locations.remove(id))) throw new ApiError(404, 'not_found');
+  // Keep a primary location: promote the first remaining active one, in checkout's tie-break order.
+  if (deleted.isPrimary) {
+    const next = (await d.repos.locations.list()).filter((l) => l.active).sort((a, b) => a.id.localeCompare(b.id))[0];
+    if (next) {
+      const { id: nextId, ...rest } = next;
+      await d.repos.locations.upsert({ ...rest, isPrimary: true }, nextId);
+    }
+  }
+  // Drop the location from rule conditions, or those rules would silently stop matching.
+  const rules = await d.repos.rules.list();
+  for (const { id: ruleId, ...rule } of rules.filter((r) => r.conditions.locationIds.includes(id))) {
+    await d.repos.rules.upsert({ ...rule, conditions: { ...rule.conditions, locationIds: rule.conditions.locationIds.filter((l) => l !== id) } }, ruleId);
+  }
   await d.repos.settings.bumpVersion();
 }
 
@@ -146,11 +176,16 @@ export async function deleteLocation(d: ServiceDeps, id: string): Promise<void> 
 // ---------------------------------------------------------------------------
 
 export async function listRules(d: ServiceDeps) {
-  const [rules, zones, { entitlement }] = await Promise.all([d.repos.rules.list(), d.repos.zones.list(), entitlementOf(d, { fresh: true })]);
+  const [rules, zones, locations, { entitlement }] = await Promise.all([
+    d.repos.rules.list(),
+    d.repos.zones.list(),
+    d.repos.locations.list(),
+    entitlementOf(d, { fresh: true }),
+  ]);
   const sorted = [...rules].sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
   return {
     rules: sorted.map((r) => ({ ...r, exceedsPlan: ruleExceedsPlan(r, entitlement.limits) })),
-    warnings: detectRuleConflicts(rules, zones),
+    warnings: detectRuleConflicts(rules, zones, locations),
     limits: entitlement.limits,
   };
 }
@@ -389,7 +424,7 @@ export async function getOverview(d: ServiceDeps) {
     entitlement,
     routing: { provider: d.providerId, configured: routingConfigured },
     rollout: { mode: d.rolloutMode, allowed: d.rolloutAllowed },
-    ruleWarnings: detectRuleConflicts(rules, zones),
+    ruleWarnings: detectRuleConflicts(rules, zones, locations),
     counts: { locations: locations.length, rules: rules.length },
   };
 }

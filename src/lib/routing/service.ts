@@ -119,7 +119,8 @@ export async function resolveRoutes(params: ResolveParams): Promise<RouteResolut
 
   // Register synchronously after the key is known so parallel identical calls share one lookup.
   const existing = inFlight.get(key);
-  if (existing) return existing;
+  // Joiners report no provider calls: only the caller that made the lookup records usage for it.
+  if (existing) return existing.then((r) => ({ ...r, providerCalls: 0 }));
   const promise = cachedOrLookup(params, key).finally(() => inFlight.delete(key));
   inFlight.set(key, promise);
   return promise;
