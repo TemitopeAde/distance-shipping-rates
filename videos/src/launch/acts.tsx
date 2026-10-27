@@ -60,14 +60,14 @@ export function MapScene({ t }: { t: number }) {
   return (
     <div style={{ position: "absolute", inset: 0, fontFamily: font, ...leave(t, end) }}>
       <div style={{
-        position: "absolute", left: 400, top: 96, width: 1120, height: 640, borderRadius: 32, overflow: "hidden", border: "8px solid #fff",
+        position: "absolute", left: 400, top: 70, width: 1120, height: 640, borderRadius: 32, overflow: "hidden", border: "8px solid #fff",
         boxShadow: "0 30px 80px rgba(10,20,60,.4)", translate: `0 ${(1 - enter) * 500}px`, opacity: clamp01(enter * 2),
       }}>
         <StreetMap w={1104} h={624} viewBox="-185 -40 1400 800" draw={draw} store={step(t - b(4, 1, 0.5), quick)}
           pin={step(t - b(5, 1), settle)} chip={clamp01((t - b(4, 2)) / 0.25)} chipMiles={12.4 * draw} />
       </div>
       <div style={{
-        position: "absolute", left: 470, top: 676, width: 980, height: 150, background: "#fff", borderRadius: 24,
+        position: "absolute", left: 470, top: 740, width: 980, height: 150, background: "#fff", borderRadius: 24,
         boxShadow: "0 24px 60px rgba(10,20,60,.35)", display: "flex", alignItems: "center", gap: 26, padding: "0 40px",
         translate: `0 ${(1 - option) * 380}px`, opacity: clamp01(option * 2),
       }}>

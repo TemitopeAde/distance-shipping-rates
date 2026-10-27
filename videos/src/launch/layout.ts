@@ -7,7 +7,7 @@ export const L = {
     start: b(16),
     land: b(16, 3),
     // measured: simulator total (right edge, center y) and phone option price.
-    from: { right: 1683, y: 820, size: 18 * 1.6 },
+    from: { right: 1644, y: 914, size: 18 * 1.6 },
     to: { right: 1656, y: 376, size: 15 * 1.25 },
   },
   // measured (debug stills, t=15.6 and t=27.8); cursor tips sit slightly left of field centers, on the text.
