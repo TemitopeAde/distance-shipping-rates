@@ -51,7 +51,7 @@ export function listFromText(text: string): string[] {
     .filter(Boolean);
 }
 
-const DISTANCE_PRESETS = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200];
+const DISTANCE_PRESETS = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000];
 
 /** Presets plus a saved value that isn't one of them, so editing never drops it. */
 export function distanceOptions(current: string): number[] {
