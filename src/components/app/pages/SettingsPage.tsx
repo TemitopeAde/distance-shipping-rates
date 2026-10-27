@@ -4,13 +4,13 @@ import { toast } from 'sonner';
 import { AlertTriangle, ShieldCheck } from 'lucide-react';
 import { settingsInputSchema, type MerchantSettings, type SupportedLocale } from '../../../lib/validation/schemas';
 import { Button } from '../../ui/button';
-import { Alert, AlertDescription, Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Checkbox, Input, Label, NativeSelect, Switch } from '../../ui/primitives';
+import { Alert, AlertDescription, Card, CardContent, CardDescription, CardHeader, CardTitle, Checkbox, Input, Label, NativeSelect, Switch } from '../../ui/primitives';
 import { api } from '../api-client';
 import { ErrorState, Field, LoadingState, PageHeader } from '../common';
 import { useApp } from '../context';
 import { distanceOptions, number } from '../format';
 import { numOrNull, serverFieldErrors, useAction, useResource, validate, type FieldErrors } from '../hooks';
-import type { BillingResponse, Overview } from '../types';
+import type { BillingResponse } from '../types';
 
 interface Form {
   unit: 'mi' | 'km';
@@ -78,7 +78,7 @@ function toInput(f: Form, language: SupportedLocale) {
   };
 }
 
-function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSettings; maxRetention: number; routing: Overview['routing'] | null }) {
+function SettingsForm({ initial, maxRetention }: { initial: MerchantSettings; maxRetention: number }) {
   const { t } = useTranslation();
   const { locale, refreshShell } = useApp();
   const [f, setF] = useState(() => toForm(initial));
@@ -228,16 +228,8 @@ function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSet
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.routing')}</CardTitle>
-          <CardDescription>{t('settings.providerManaged')}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <div className="grid gap-1.5 text-sm">
-            <span className="font-medium">{t('settings.provider')}</span>
-            <span className="flex items-center gap-2">
-              <span className="capitalize">{routing?.provider ?? '—'}</span>
-              <Badge variant={routing?.configured ? 'success' : 'destructive'}>{routing?.configured ? t('settings.configured') : t('settings.notConfigured')}</Badge>
-            </span>
-          </div>
           <Field id="st-cache" label={t('settings.cache')} hint={t('settings.cacheHint')} error={errors.cacheTtlHours}>
             <Input inputMode="numeric" value={f.cacheTtlHours} onChange={(e) => set('cacheTtlHours', e.target.value)} />
           </Field>
@@ -297,7 +289,6 @@ export function SettingsPage() {
   const { t } = useTranslation();
   const settings = useResource<MerchantSettings>('settings');
   const billing = useResource<BillingResponse>('billing');
-  const overview = useResource<Overview>('overview');
 
   return (
     <>
@@ -309,7 +300,6 @@ export function SettingsPage() {
           key={settings.data.settingsVersion}
           initial={settings.data}
           maxRetention={billing.data?.entitlement.limits.maxLogRetentionDays ?? 90}
-          routing={overview.data?.routing ?? null}
         />
       )}
     </>
