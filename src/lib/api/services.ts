@@ -92,10 +92,12 @@ async function geocodeLocation(d: ServiceDeps, input: LocationInput) {
   const address = normalizeAddress(input.address);
   try {
     const start = Date.now();
+    // Dashboard-only path: providers (notably Geoapify) routinely take 4–8s to geocode,
+    // so allow far more than the checkout budget before reporting "unavailable".
     const geo = await withRetry(
       (signal) => d.provider!.geocode(address, { signal }),
-      { attemptTimeoutMs: 3000, maxAttempts: 2, baseDelayMs: 200 },
-      { at: start + 7000, now: Date.now },
+      { attemptTimeoutMs: 10000, maxAttempts: 2, baseDelayMs: 200 },
+      { at: start + 20000, now: Date.now },
     );
     if (geo.quality === 'low') return { warning: 'geocode_low_confidence' as const, geo };
     return { warning: null, geo };

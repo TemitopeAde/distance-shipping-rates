@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AlertTriangle, ShieldCheck } from 'lucide-react';
-import { LOCALE_NAMES } from '../../../lib/i18n';
-import { settingsInputSchema, supportedLocales, type MerchantSettings, type SupportedLocale } from '../../../lib/validation/schemas';
+import { settingsInputSchema, type MerchantSettings, type SupportedLocale } from '../../../lib/validation/schemas';
 import { Button } from '../../ui/button';
 import { Alert, AlertDescription, Badge, Card, CardContent, CardDescription, CardHeader, CardTitle, Checkbox, Input, Label, NativeSelect, Switch } from '../../ui/primitives';
 import { api } from '../api-client';
@@ -14,7 +13,6 @@ import type { BillingResponse, Overview } from '../types';
 
 interface Form {
   unit: 'mi' | 'km';
-  language: SupportedLocale;
   originStrategy: 'primary' | 'nearest';
   maxDeliveryDistance: string;
   failureMode: 'fail_closed' | 'fail_open';
@@ -37,7 +35,6 @@ interface Form {
 function toForm(s: MerchantSettings): Form {
   return {
     unit: s.unit,
-    language: s.language,
     originStrategy: s.originStrategy,
     maxDeliveryDistance: s.maxDeliveryDistance === null ? '' : String(s.maxDeliveryDistance),
     failureMode: s.failureMode,
@@ -58,11 +55,11 @@ function toForm(s: MerchantSettings): Form {
   };
 }
 
-function toInput(f: Form) {
+function toInput(f: Form, language: SupportedLocale) {
   const hasFallback = f.fallbackTitle.trim() !== '' || f.fallbackPrice.trim() !== '';
   return {
     unit: f.unit,
-    language: f.language,
+    language,
     pluginEnabled: f.pluginEnabled,
     originStrategy: f.originStrategy,
     maxDeliveryDistance: numOrNull(f.maxDeliveryDistance),
@@ -82,7 +79,7 @@ function toInput(f: Form) {
 
 function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSettings; maxRetention: number; routing: Overview['routing'] | null }) {
   const { t } = useTranslation();
-  const { setLocale, refreshShell } = useApp();
+  const { locale, refreshShell } = useApp();
   const [f, setF] = useState(() => toForm(initial));
   const [errors, setErrors] = useState<FieldErrors>({});
   const { busy, run } = useAction();
@@ -94,7 +91,7 @@ function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSet
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = validate(settingsInputSchema, toInput(f));
+    const parsed = validate(settingsInputSchema, toInput(f, locale));
     if (!parsed.ok) {
       setErrors(parsed.errors);
       toast.error(t('common.fixErrors'));
@@ -107,7 +104,6 @@ function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSet
     });
     if (saved) {
       setF(toForm(saved));
-      setLocale(saved.language);
       refreshShell();
     }
   };
@@ -123,15 +119,6 @@ function SettingsForm({ initial, maxRetention, routing }: { initial: MerchantSet
             <NativeSelect value={f.unit} onChange={(e) => set('unit', e.target.value as Form['unit'])}>
               <option value="mi">{t('common.units.miles')}</option>
               <option value="km">{t('common.units.kilometers')}</option>
-            </NativeSelect>
-          </Field>
-          <Field id="st-lang" label={t('settings.language')}>
-            <NativeSelect value={f.language} onChange={(e) => set('language', e.target.value as SupportedLocale)}>
-              {supportedLocales.map((l) => (
-                <option key={l} value={l}>
-                  {LOCALE_NAMES[l]}
-                </option>
-              ))}
             </NativeSelect>
           </Field>
           <Field id="st-origin" label={t('settings.origin')} hint={t('settings.originHint')}>

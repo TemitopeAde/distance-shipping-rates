@@ -8,11 +8,11 @@ import { ConfirmDialog, Dialog, DialogContent, DialogDescription, DialogFooter, 
 import { Alert, AlertDescription, Badge, Card, CardContent, Input, Label, Switch } from '../../ui/primitives';
 import { api } from '../api-client';
 import { AddressAutocomplete, type AddressSuggestion } from '../AddressAutocomplete';
-import { CountrySelect } from '../CountrySelect';
+import { CountryMultiSelect, CountrySelect } from '../CountrySelect';
 import { CitySelect, SubdivisionSelect } from '../LocationSelects';
 import { EmptyState, ErrorState, Field, LoadingState, PageHeader } from '../common';
 import { useApp } from '../context';
-import { listFromText, number } from '../format';
+import { number } from '../format';
 import { numOrNull, serverFieldErrors, useAction, useResource, validate, type FieldErrors } from '../hooks';
 import type { FulfillmentLocation } from '../types';
 
@@ -27,7 +27,7 @@ interface FormState {
   isPrimary: boolean;
   active: boolean;
   serviceRadius: string;
-  serviceCountries: string;
+  serviceCountries: string[];
 }
 
 const empty: FormState = {
@@ -41,7 +41,7 @@ const empty: FormState = {
   isPrimary: false,
   active: true,
   serviceRadius: '',
-  serviceCountries: '',
+  serviceCountries: [],
 };
 
 function toForm(l: FulfillmentLocation): FormState {
@@ -51,7 +51,7 @@ function toForm(l: FulfillmentLocation): FormState {
     isPrimary: l.isPrimary,
     active: l.active,
     serviceRadius: l.serviceRadius === null ? '' : String(l.serviceRadius),
-    serviceCountries: l.serviceCountries.join(', '),
+    serviceCountries: l.serviceCountries,
   };
 }
 
@@ -62,7 +62,7 @@ function toInput(f: FormState) {
     isPrimary: f.isPrimary,
     active: f.active,
     serviceRadius: numOrNull(f.serviceRadius),
-    serviceCountries: listFromText(f.serviceCountries).map((c) => c.toUpperCase()),
+    serviceCountries: f.serviceCountries,
   };
 }
 
@@ -130,7 +130,7 @@ function LocationForm({ initial, id, onDone }: { initial: FormState; id: string 
           <Input inputMode="decimal" value={form.serviceRadius} onChange={(e) => set('serviceRadius', e.target.value)} />
         </Field>
         <Field id="loc-countries" label={t('locations.serviceCountries')} hint={t('locations.serviceCountriesHint')} optional error={errors.serviceCountries}>
-          <Input value={form.serviceCountries} onChange={(e) => set('serviceCountries', e.target.value)} />
+          <CountryMultiSelect value={form.serviceCountries} onChange={(codes) => set('serviceCountries', codes)} />
         </Field>
       </div>
       <div className="grid gap-4">

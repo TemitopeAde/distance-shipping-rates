@@ -8,6 +8,7 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: v
 
 const { createI18n } = await import('../../lib/i18n');
 const { COUNTRY_CODES } = await import('../../lib/location/countries-now');
+const { defaultSettings } = await import('../../lib/validation/defaults');
 const { __setFetcher } = await import('./api-client');
 const { __setLocationFetcher } = await import('../../lib/location/countries-now');
 const { AppContext } = await import('./context');
@@ -15,6 +16,7 @@ const { OfflineNotice, Field, LookupsRemaining } = await import('./common');
 const { TooltipProvider, Input } = await import('../ui/primitives');
 const { Button } = await import('../ui/button');
 const { LocationsPage } = await import('./pages/LocationsPage');
+const { SettingsPage } = await import('./pages/SettingsPage');
 const { AppShell } = await import('./AppShell');
 const { CountryMultiSelect } = await import('./CountrySelect');
 
@@ -326,5 +328,21 @@ describe('AppShell', () => {
     expect(document.documentElement.lang).toBe('ar');
     expect(screen.getAllByText('الإعدادات').length).toBeGreaterThan(0);
     window.localStorage.removeItem('distance-shipping:locale');
+  });
+});
+
+describe('SettingsPage', () => {
+  it('leaves dashboard language selection to the sidebar', async () => {
+    __setFetcher((url) => {
+      const path = new URL(url).pathname;
+      if (path.endsWith('/settings')) return Promise.resolve(json(defaultSettings()));
+      if (path.endsWith('/billing')) return Promise.resolve(json({ entitlement: { limits: { maxLogRetentionDays: 90 } } }));
+      return Promise.resolve(json({ routing: null }));
+    });
+
+    render(withProviders(<SettingsPage />));
+
+    await screen.findByText('General');
+    expect(screen.queryByLabelText('Dashboard language')).toBeNull();
   });
 });
