@@ -7,6 +7,7 @@ import { useApp, type PageId } from '../context';
 import { dateTime, number } from '../format';
 import { useResource } from '../hooks';
 import type { Overview } from '../types';
+import { openShippingSettings } from '../wix-pages';
 import { LogTable } from './LogsPage';
 
 const STEP_TARGET: Record<string, PageId> = {
@@ -15,7 +16,6 @@ const STEP_TARGET: Record<string, PageId> = {
   rules: 'rules',
   routing: 'settings',
   fallback: 'settings',
-  carrier: 'checkout',
   simulate: 'simulator',
   test_checkout: 'checkout',
   go_live: 'checkout',
@@ -116,7 +116,7 @@ export function OverviewPage() {
                   <li key={step.id}>
                     <button
                       type="button"
-                      onClick={() => navigate(STEP_TARGET[step.id] ?? 'overview')}
+                      onClick={() => (step.id === 'carrier' ? openShippingSettings() : navigate(STEP_TARGET[step.id] ?? 'overview'))}
                       className="hover:bg-muted flex w-full items-start gap-3 rounded-lg p-3 text-start transition-colors"
                     >
                       {step.done ? (

@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, LifeBuoy, Rocket } from 'lucide-react';
+import { ExternalLink, LifeBuoy, Mail, Rocket } from 'lucide-react';
+import { Button } from '../../ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Card, CardContent, CardHeader, CardTitle } from '../../ui/primitives';
 import { PageHeader } from '../common';
+import { ManageAppsScreenshot } from '../ManageAppsScreenshot';
+import { openShippingSettings, SUPPORT_EMAIL, SUPPORT_MAILTO } from '../wix-pages';
+
+const FAQ = ['1', '6', '7', '8', '2', '9', '10', '11', '3', '12', '4', '13', '5'] as const;
 
 export function HelpPage() {
   const { t } = useTranslation();
@@ -33,6 +38,14 @@ export function HelpPage() {
             <p>{t('help.supportBody')}</p>
             <a
               className="text-primary inline-flex items-center gap-1 underline-offset-4 hover:underline"
+              href={SUPPORT_MAILTO}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Mail className="size-3.5" aria-hidden="true" /> {t('help.contactDeveloper')}: {SUPPORT_EMAIL}
+            </a>
+            <a
+              className="text-primary inline-flex items-center gap-1 underline-offset-4 hover:underline"
               href="https://support.wix.com/en/article/wix-stores-offering-real-time-shipping-rates-via-third-party-apps"
               target="_blank"
               rel="noopener noreferrer"
@@ -47,13 +60,36 @@ export function HelpPage() {
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible>
-              {(['1', '2', '3', '4', '5'] as const).map((n) => (
+              <AccordionItem value="enable">
+                <AccordionTrigger>{t('help.qEnable')}</AccordionTrigger>
+                <AccordionContent className="grid gap-3">
+                  <p className="text-muted-foreground">{t('help.aEnable')}</p>
+                  <ol className="text-muted-foreground grid list-decimal gap-1 ps-5">
+                    <li>{t('checkout.step1')}</li>
+                    <li>{t('checkout.step2')}</li>
+                    <li>{t('checkout.step3', { app: t('common.appName') })}</li>
+                    <li>{t('checkout.step4')}</li>
+                    <li>{t('checkout.step5')}</li>
+                  </ol>
+                  <ManageAppsScreenshot />
+                  <Button className="w-fit" onClick={openShippingSettings}>
+                    <ExternalLink /> {t('checkout.openShippingSettings')}
+                  </Button>
+                </AccordionContent>
+              </AccordionItem>
+              {FAQ.map((n) => (
                 <AccordionItem key={n} value={n}>
                   <AccordionTrigger>{t(`help.q${n}`)}</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">{t(`help.a${n}`)}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
+            <p className="text-muted-foreground mt-4 text-sm">
+              {t('help.stillStuck')}{' '}
+              <a className="text-primary underline-offset-4 hover:underline" href={SUPPORT_MAILTO} target="_blank" rel="noopener noreferrer">
+                {SUPPORT_EMAIL}
+              </a>
+            </p>
           </CardContent>
         </Card>
       </div>

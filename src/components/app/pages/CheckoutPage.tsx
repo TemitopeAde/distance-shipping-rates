@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Info, Pause, Play, XCircle } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Info, Pause, Play, XCircle } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { ConfirmDialog } from '../../ui/dialog';
 import { Alert, AlertDescription, Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/primitives';
@@ -10,6 +10,8 @@ import { useApp } from '../context';
 import { dateTime } from '../format';
 import { useAction, useResource } from '../hooks';
 import type { Overview } from '../types';
+import { openShippingSettings } from '../wix-pages';
+import { ManageAppsScreenshot } from '../ManageAppsScreenshot';
 
 function Check({ ok, label }: { ok: boolean; label: string }) {
   return (
@@ -75,15 +77,21 @@ export function CheckoutPage() {
                 <li>{t('checkout.step4')}</li>
                 <li>{t('checkout.step5')}</li>
               </ol>
-              {step('carrier') ? (
-                <Badge variant="success" className="w-fit">
-                  <CheckCircle2 /> {t('checkout.carrierConfirmed')}
-                </Badge>
-              ) : (
-                <Button variant="outline" className="w-fit" loading={busy} onClick={() => void act('confirm_carrier', t('common.saved'))}>
-                  {t('checkout.confirmCarrier')}
+              <ManageAppsScreenshot />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button className="w-fit" onClick={openShippingSettings}>
+                  <ExternalLink /> {t('checkout.openShippingSettings')}
                 </Button>
-              )}
+                {step('carrier') ? (
+                  <Badge variant="success" className="w-fit">
+                    <CheckCircle2 /> {t('checkout.carrierConfirmed')}
+                  </Badge>
+                ) : (
+                  <Button variant="outline" className="w-fit" loading={busy} onClick={() => void act('confirm_carrier', t('common.saved'))}>
+                    {t('checkout.confirmCarrier')}
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

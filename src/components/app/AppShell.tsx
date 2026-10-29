@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   ListOrdered,
+  Mail,
   Map,
   MapPin,
   Menu,
@@ -17,6 +18,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { createI18n, directionOf, LOCALE_NAMES, matchLocale } from '../../lib/i18n';
+import { SUPPORT_MAILTO } from './wix-pages';
 import { supportedLocales, type MerchantSettings, type SupportedLocale } from '../../lib/validation/schemas';
 import { Button } from '../ui/button';
 import { Dialog, DialogTitle, SheetContent } from '../ui/dialog';
@@ -157,6 +159,15 @@ function Shell({ locale, setLocale }: { locale: SupportedLocale; setLocale: (l: 
         {live ? t('nav.status.live') : t('nav.status.paused')}
       </Badge>
       <NavList page={page} onSelect={navigate} />
+      <a
+        href={SUPPORT_MAILTO}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sidebar-foreground hover:bg-muted flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+      >
+        <Mail className="size-4 shrink-0" aria-hidden="true" />
+        {t('help.contactDeveloper')}
+      </a>
       {billing.data && plan && (
         <div className="bg-card mx-2 grid gap-2 rounded-lg border p-3">
           <p className="text-muted-foreground text-xs">{t('nav.currentPlan', { plan: t(`common.planNames.${plan}`) })}</p>
